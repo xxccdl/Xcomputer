@@ -70,7 +70,8 @@
       "!**/*.map",
       "!node_modules/@node-llama-cpp/win-arm64/**",
       "!node_modules/@node-llama-cpp/win-x64-cuda-ext/**",
-      "!node_modules/@node-llama-cpp/win-x64-vulkan/**"
+      "!node_modules/@node-llama-cpp/win-x64-vulkan/**",
+      "!node_modules/node-llama-cpp/llama/gitRelease.bundle"
     ],
     "asarUnpack": [
       "node_modules/node-llama-cpp/**",
@@ -126,7 +127,8 @@
     ],
     "win": {
       "target": "nsis",
-      "artifactName": "${productName}-${version}-setup.${ext}"
+      "artifactName": "${productName}-${version}-setup.${ext}",
+      "electronLanguages": ["zh-CN", "en-US"]
     },
     "nsis": {
       "oneClick": false,
