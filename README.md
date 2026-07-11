@@ -101,7 +101,8 @@ npm run dist
 
 ## 📥 下载安装
 
-访问官网 [xxccdl.cn](http://xxccdl.cn) 下载最新版安装包，或直接从 [GitHub Releases](https://github.com/xxccdl/Xcomputer/releases) 下载。
+访问官网 [xxccdl.cn](https://xxccdl.cn) 下载最新版安装包，或直接从 [GitHub Releases](https://github.com/xxccdl/Xcomputer/releases) 下载。
+> **注意**：
 
 ## 🔧 MCP 工具配置
 
@@ -116,7 +117,7 @@ Xcomputer 支持本地大语言模型推理（基于 node-llama-cpp）：
 
 - **CPU 推理** — 开箱即用，无需额外配置
 - **CUDA 加速** — 支持 NVIDIA GPU 加速
-- 模型文件放在 `resources/local-models/`（.gguf 格式，需自行下载，不提交到仓库）
+- 模型文件放在 `resources/local-models/`（.gguf 格式，需自行从gitee下载，不提交到仓库，download-url:[Gitee模力方舟](https://ai.gitee.com/xxccdl/litex)）
 
 ## 📱 配套项目
 
