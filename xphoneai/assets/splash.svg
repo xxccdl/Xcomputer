@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1284 2778" width="1284" height="2778">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="40%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#0a0e1a"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#58a6ff"/>
+      <stop offset="100%" stop-color="#79c0ff"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.4">
+      <stop offset="0%" stop-color="#58a6ff" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#58a6ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="1284" height="2778" fill="url(#bg)"/>
+  <rect width="1284" height="2778" fill="url(#glow)"/>
+
+  <!-- 装饰网格圆点 -->
+  <g fill="#58a6ff" opacity="0.03">
+    <circle cx="100" cy="500" r="2"/><circle cx="200" cy="500" r="2"/><circle cx="300" cy="500" r="2"/>
+    <circle cx="400" cy="500" r="2"/><circle cx="500" cy="500" r="2"/><circle cx="600" cy="500" r="2"/>
+    <circle cx="700" cy="500" r="2"/><circle cx="800" cy="500" r="2"/><circle cx="900" cy="500" r="2"/>
+    <circle cx="1000" cy="500" r="2"/><circle cx="1100" cy="500" r="2"/>
+    <circle cx="100" cy="2400" r="2"/><circle cx="200" cy="2400" r="2"/><circle cx="300" cy="2400" r="2"/>
+    <circle cx="400" cy="2400" r="2"/><circle cx="500" cy="2400" r="2"/><circle cx="600" cy="2400" r="2"/>
+    <circle cx="700" cy="2400" r="2"/><circle cx="800" cy="2400" r="2"/><circle cx="900" cy="2400" r="2"/>
+    <circle cx="1000" cy="2400" r="2"/><circle cx="1100" cy="2400" r="2"/>
+  </g>
+
+  <!-- ===== 中心图标 ===== -->
+  <g transform="translate(642, 1200)">
+    <!-- 外圈光晕 -->
+    <circle cx="0" cy="0" r="140" fill="none" stroke="#58a6ff" stroke-width="1" opacity="0.08"/>
+    <circle cx="0" cy="0" r="160" fill="none" stroke="#58a6ff" stroke-width="0.5" opacity="0.04"/>
+
+    <!-- 圆角方形背景 -->
+    <rect x="-94" y="-160" width="188" height="320" rx="32" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+
+    <!-- 手机机身 -->
+    <path d="M-60,-120 L60,-120 C68,-120 74,-114 74,-106 L74,106 C74,114 68,120 60,120 L-60,120 C-68,120 -74,114 -74,106 L-74,-106 C-74,-114 -68,-120 -60,-120 Z" fill="none" stroke="url(#accent)" stroke-width="2.5"/>
+
+    <!-- 屏幕 -->
+    <rect x="-52" y="-96" width="104" height="176" rx="12" fill="#0d1117"/>
+
+    <!-- AI 图案：三条平行线 + 中心圆 -->
+    <g opacity="0.6">
+      <line x1="-30" y1="-30" x2="30" y2="-30" stroke="#58a6ff" stroke-width="2" stroke-linecap="round"/>
+      <line x1="-30" y1="0" x2="30" y2="0" stroke="#58a6ff" stroke-width="2" stroke-linecap="round"/>
+      <line x1="-30" y1="30" x2="30" y2="30" stroke="#58a6ff" stroke-width="2" stroke-linecap="round"/>
+    </g>
+
+    <!-- 中心发光圆 -->
+    <circle cx="0" cy="0" r="14" fill="url(#accent)" opacity="0.2"/>
+    <circle cx="0" cy="0" r="6" fill="url(#accent)"/>
+    <circle cx="0" cy="0" r="3" fill="#fff" opacity="0.8"/>
+
+    <!-- 节点上下左右 -->
+    <g fill="url(#accent)" opacity="0.7">
+      <circle cx="0" cy="-48" r="4"/><line x1="0" y1="-44" x2="0" y2="-14" stroke="#58a6ff" stroke-width="1" opacity="0.3"/>
+      <circle cx="0" cy="48" r="4"/><line x1="0" y1="44" x2="0" y2="14" stroke="#58a6ff" stroke-width="1" opacity="0.3"/>
+      <circle cx="-48" cy="0" r="4"/><line x1="-44" y1="0" x2="-14" y2="0" stroke="#58a6ff" stroke-width="1" opacity="0.3"/>
+      <circle cx="48" cy="0" r="4"/><line x1="44" y1="0" x2="14" y2="0" stroke="#58a6ff" stroke-width="1" opacity="0.3"/>
+    </g>
+
+    <!-- 听筒 -->
+    <rect x="-20" y="-113" width="40" height="3.5" rx="1.75" fill="#58a6ff" opacity="0.3"/>
+  </g>
+
+  <!-- App 名称 -->
+  <text x="642" y="1480" text-anchor="middle" fill="#c9d1d9" font-family="system-ui, -apple-system, sans-serif" font-size="60" font-weight="700" letter-spacing="6">xphoneai</text>
+
+  <!-- 分隔线 -->
+  <line x1="500" y1="1530" x2="784" y2="1530" stroke="#30363d" stroke-width="1"/>
+
+  <!-- 副标题 -->
+  <text x="642" y="1570" text-anchor="middle" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="28" letter-spacing="3">AI 手机助手</text>
+
+  <!-- 底部文字 -->
+  <text x="642" y="2580" text-anchor="middle" fill="#30363d" font-family="system-ui, -apple-system, sans-serif" font-size="24" letter-spacing="1">© 2026 xphoneai</text>
+</svg>

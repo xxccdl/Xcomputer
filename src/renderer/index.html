@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xcomputer</title>
+    <style>
+      /* ── 开机动画（精简克制版） ── */
+      :root {
+        --spring-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+        --spring-decel: cubic-bezier(0, 0.55, 0.45, 1);
+        --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0d1117;
+        font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      /* ── 主容器：单一垂直中轴 ── */
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background:
+          radial-gradient(ellipse 50% 40% at 50% 45%, rgba(88, 166, 255, 0.08) 0%, transparent 70%),
+          #0d1117;
+        transition: opacity 0.5s var(--spring-smooth), visibility 0.5s var(--spring-smooth);
+        opacity: 1;
+        visibility: visible;
+      }
+
+      #splash.fade-out {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      /* 退场时内容错峰下沉消散 */
+      #splash.fade-out .splash-content > * {
+        opacity: 0 !important;
+        transform: translateY(8px) scale(0.96) !important;
+        filter: blur(6px) !important;
+        animation: none !important;
+        transition: opacity 0.4s var(--spring-smooth), transform 0.4s var(--spring-smooth), filter 0.4s var(--spring-smooth);
+      }
+      #splash.fade-out .splash-content > *:nth-child(1) { transition-delay: 0ms; }
+      #splash.fade-out .splash-content > *:nth-child(2) { transition-delay: 60ms; }
+      #splash.fade-out .splash-content > *:nth-child(3) { transition-delay: 120ms; }
+      #splash.fade-out .splash-content > *:nth-child(4) { transition-delay: 180ms; }
+
+      /* 内容容器：标题+副标题+进度条紧贴成整体 */
+      .splash-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+
+      /* ── 顶部标识：Xcomputer 应用图标 ── */
+      .splash-mark {
+        width: 80px;
+        height: 80px;
+        border-radius: 18px;
+        object-fit: contain;
+        margin-bottom: 32px;
+        opacity: 0;
+        transform: scale(0.4);
+        filter: drop-shadow(0 0 16px rgba(88, 166, 255, 0.5)) drop-shadow(0 0 32px rgba(88, 166, 255, 0.25));
+        animation: mark-in 0.6s var(--spring-bounce) 0.1s forwards,
+                   mark-breathe 2.4s ease-in-out 0.7s infinite;
+      }
+
+      @keyframes mark-in {
+        0%   { opacity: 0; transform: scale(0.4); }
+        100% { opacity: 1; transform: scale(1); }
+      }
+
+      @keyframes mark-breathe {
+        0%, 100% { filter: drop-shadow(0 0 16px rgba(88, 166, 255, 0.5)) drop-shadow(0 0 32px rgba(88, 166, 255, 0.25)); }
+        50%      { filter: drop-shadow(0 0 24px rgba(88, 166, 255, 0.7)) drop-shadow(0 0 48px rgba(88, 166, 255, 0.4)); }
+      }
+
+      /* ── 标题：渐变流动文字 ── */
+      .splash-title {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        margin-bottom: 14px;
+        padding-right: 4px; /* 补偿 letter-spacing 视觉偏移 */
+      }
+
+      .splash-letter {
+        display: inline-block;
+        font-size: 44px;
+        font-weight: 700;
+        letter-spacing: 4px;
+        background: linear-gradient(135deg, #58a6ff 0%, #79b8ff 50%, #d2a8ff 100%);
+        background-size: 200% 100%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        opacity: 0;
+        filter: blur(8px);
+        transform: translateY(12px);
+        animation:
+          letter-in 0.55s var(--spring-smooth) forwards,
+          gradient-flow 4s ease-in-out infinite;
+      }
+
+      .splash-letter:nth-child(1)  { animation-delay: 0.25s, 0.8s; }
+      .splash-letter:nth-child(2)  { animation-delay: 0.33s, 0.88s; }
+      .splash-letter:nth-child(3)  { animation-delay: 0.41s, 0.96s; }
+      .splash-letter:nth-child(4)  { animation-delay: 0.49s, 1.04s; }
+      .splash-letter:nth-child(5)  { animation-delay: 0.57s, 1.12s; }
+      .splash-letter:nth-child(6)  { animation-delay: 0.65s, 1.20s; }
+      .splash-letter:nth-child(7)  { animation-delay: 0.73s, 1.28s; }
+      .splash-letter:nth-child(8)  { animation-delay: 0.81s, 1.36s; }
+      .splash-letter:nth-child(9)  { animation-delay: 0.89s, 1.44s; }
+
+      @keyframes letter-in {
+        0%   { opacity: 0; filter: blur(8px); transform: translateY(12px); }
+        60%  { opacity: 1; filter: blur(0); transform: translateY(-2px); }
+        100% { opacity: 1; filter: blur(0); transform: translateY(0); }
+      }
+
+      @keyframes gradient-flow {
+        0%, 100% { background-position: 0% 50%; }
+        50%      { background-position: 100% 50%; }
+      }
+
+      /* ── 副标题 ── */
+      .splash-subtitle {
+        font-size: 14px;
+        color: #8b949e;
+        letter-spacing: 6px;
+        font-weight: 400;
+        opacity: 0;
+        filter: blur(6px);
+        animation: subtitle-in 0.6s var(--spring-smooth) 1.5s forwards;
+        margin-bottom: 40px;
+      }
+
+      @keyframes subtitle-in {
+        0%   { opacity: 0; filter: blur(6px); transform: translateY(6px); }
+        100% { opacity: 0.85; filter: blur(0); transform: translateY(0); }
+      }
+
+      /* ── 进度条：紧贴副标题，单一光带手法 ── */
+      .splash-progress {
+        width: 240px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        opacity: 0;
+        animation: progress-in 0.5s var(--spring-smooth) 1.4s forwards;
+      }
+
+      @keyframes progress-in {
+        0%   { opacity: 0; }
+        100% { opacity: 1; }
+      }
+
+      .splash-progress-track {
+        width: 100%;
+        height: 2px;
+        border-radius: 1px;
+        background: rgba(48, 54, 61, 0.6);
+        overflow: hidden;
+        position: relative;
+      }
+
+      .splash-progress-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 1px;
+        background: linear-gradient(90deg, #58a6ff, #79b8ff, #d2a8ff);
+        box-shadow: 0 0 8px rgba(88, 166, 255, 0.6);
+        animation: progress-bar 1.8s var(--spring-decel) 1.5s forwards;
+        position: relative;
+      }
+
+      @keyframes progress-bar {
+        0%   { width: 0%; }
+        100% { width: 100%; }
+      }
+
+      /* 前导光点：单一装饰，随进度移动 */
+      .splash-progress-fill::after {
+        content: '';
+        position: absolute;
+        right: -3px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #d2a8ff;
+        box-shadow: 0 0 8px #d2a8ff, 0 0 16px rgba(210, 168, 255, 0.5);
+        opacity: 0.9;
+      }
+
+      .splash-progress-label {
+        font-size: 10px;
+        color: rgba(110, 118, 129, 0.7);
+        letter-spacing: 3px;
+        font-family: 'SF Mono', 'JetBrains Mono', 'Consolas', monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 开机动画（React 挂载后移除） -->
+    <div id="splash">
+      <div class="splash-content">
+        <!-- 顶部标识：Xcomputer 应用图标 -->
+        <img class="splash-mark" src="./icon.png" alt="Xcomputer" />
+
+        <!-- 标题 -->
+        <div class="splash-title">
+          <span class="splash-letter">X</span>
+          <span class="splash-letter">c</span>
+          <span class="splash-letter">o</span>
+          <span class="splash-letter">m</span>
+          <span class="splash-letter">p</span>
+          <span class="splash-letter">u</span>
+          <span class="splash-letter">t</span>
+          <span class="splash-letter">e</span>
+          <span class="splash-letter">r</span>
+        </div>
+
+        <!-- 副标题 -->
+        <div class="splash-subtitle">AI 桌面自动化助手</div>
+
+        <!-- 进度条 -->
+        <div class="splash-progress">
+          <div class="splash-progress-track">
+            <div class="splash-progress-fill"></div>
+          </div>
+          <div class="splash-progress-label">LOADING</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="root"></div>
+    <script type="module" src="./src/main.tsx"></script>
+  </body>
+</html>

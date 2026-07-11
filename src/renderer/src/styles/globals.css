@@ -1,0 +1,713 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: #0d1117;
+    color: #e6edf3;
+    font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 自定义滚动条 — 更细更现代 */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(48, 54, 61, 0.5);
+    border-radius: 3px;
+    transition: background 0.2s ease;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(72, 79, 88, 0.8);
+  }
+
+  /* 选中文本 */
+  ::selection {
+    background: rgba(88, 166, 255, 0.3);
+  }
+}
+
+@layer components {
+  .font-mono {
+    font-family: 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
+  }
+
+  /* prose：技能/市场详情中 Markdown 渲染的基础排版样式
+     （替代 @tailwindcss/typography 插件，避免引入额外依赖） */
+  .prose {
+    @apply text-sm leading-relaxed text-text-primary;
+  }
+  .prose h1 {
+    @apply mb-3 text-lg font-bold;
+  }
+  .prose h2 {
+    @apply mb-2 mt-4 text-base font-bold;
+  }
+  .prose h3 {
+    @apply mb-1.5 mt-3 text-sm font-semibold;
+  }
+  .prose h4 {
+    @apply mb-1 mt-2 text-sm font-semibold text-text-secondary;
+  }
+  .prose p {
+    @apply mb-2 last:mb-0;
+  }
+  .prose ul {
+    @apply mb-2 list-disc pl-5 space-y-0.5;
+  }
+  .prose ol {
+    @apply mb-2 list-decimal pl-5 space-y-0.5;
+  }
+  .prose li {
+    @apply text-text-primary;
+  }
+  .prose code {
+    @apply rounded bg-bg-input px-1 py-0.5 font-mono text-[0.85em] text-accent;
+  }
+  .prose pre {
+    @apply my-2 overflow-x-auto rounded-md border border-border bg-bg-input p-3;
+  }
+  .prose pre code {
+    @apply bg-transparent p-0 text-xs text-text-secondary;
+  }
+  .prose a {
+    @apply text-accent underline hover:opacity-80;
+  }
+  .prose blockquote {
+    @apply my-2 border-l-2 border-border pl-3 text-text-muted;
+  }
+  .prose hr {
+    @apply my-3 border-border;
+  }
+  .prose table {
+    @apply my-2 border-collapse border border-border text-xs;
+  }
+  .prose th {
+    @apply border border-border bg-bg-hover px-2 py-1 text-left font-semibold;
+  }
+  .prose td {
+    @apply border border-border px-2 py-1;
+  }
+  .prose strong {
+    @apply font-semibold;
+  }
+  .prose.prose-sm {
+    @apply text-xs;
+  }
+
+  /* 按钮基础样式 */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-all;
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .btn:active {
+    transform: scale(0.96);
+  }
+  .btn-primary {
+    @apply btn bg-accent text-white hover:bg-accent-hover;
+  }
+  .btn-ghost {
+    @apply btn text-text-secondary hover:bg-bg-hover hover:text-text-primary;
+  }
+  .btn-danger {
+    @apply btn bg-danger/10 text-danger hover:bg-danger/20;
+  }
+
+  /* 输入框 */
+  .input {
+    @apply w-full rounded-md border border-border bg-bg-input px-3 py-2 text-text-primary placeholder-text-muted outline-none transition-all focus:border-accent;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .input:focus {
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+  }
+
+  /* 选项芯片（类型选择器、预设按钮）：现代精炼风格 */
+  .chip {
+    @apply rounded-lg border px-2.5 py-1.5 text-[11px] font-medium transition-all;
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .chip:hover {
+    transform: translateY(-1px);
+  }
+  .chip:active {
+    transform: scale(0.96);
+  }
+  .chip-active {
+    @apply border-accent bg-accent/15 text-accent;
+    box-shadow: 0 0 0 1px rgba(88, 166, 255, 0.2), 0 4px 12px rgba(88, 166, 255, 0.12);
+  }
+  .chip-idle {
+    @apply border-border text-text-muted hover:border-text-muted hover:bg-bg-hover/50;
+  }
+
+  /* 模态框外壳（统一四个自动化弹窗的容器风格） */
+  .modal-shell {
+    @apply flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-border bg-bg-panel shadow-2xl;
+  }
+  /* 模态框头部图标徽章（渐变 + 阴影，替代扁平图标） */
+  .modal-icon-badge {
+    @apply flex h-7 w-7 items-center justify-center rounded-lg text-white shadow-md;
+  }
+}
+
+/* ============ 动画关键帧 ============ */
+@layer utilities {
+  /* 淡入 */
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* 淡入上滑（消息出现） */
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* 淡入下滑 */
+  @keyframes fade-in-down {
+    from {
+      opacity: 0;
+      transform: translateY(-12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* 缩放进入（弹窗） */
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* 从右滑入（面板） */
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* 从左滑入 */
+  @keyframes slide-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* 骨架屏闪烁 */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* 发光脉冲 */
+  @keyframes glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(88, 166, 255, 0);
+    }
+    50% {
+      box-shadow: 0 0 12px 2px rgba(88, 166, 255, 0.3);
+    }
+  }
+
+  /* 渐变流动（品牌标题） */
+  @keyframes gradient-flow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* 抖动（错误反馈） */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-4px); }
+    40%, 80% { transform: translateX(4px); }
+  }
+
+  /* 弹跳进入（通知/徽章） */
+  @keyframes bounce-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.08);
+    }
+    70% {
+      transform: scale(0.95);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  /* 打字指示器（AI 思考中三点） */
+  @keyframes typing-dot {
+    0%, 60%, 100% {
+      opacity: 0.3;
+      transform: translateY(0);
+    }
+    30% {
+      opacity: 1;
+      transform: translateY(-4px);
+    }
+  }
+
+  /* 进度条条纹流动 */
+  @keyframes progress-stripe {
+    0% { background-position: 0 0; }
+    100% { background-position: 40px 0; }
+  }
+
+  /* 向下展开（折叠面板） */
+  @keyframes expand-down {
+    from {
+      opacity: 0;
+      max-height: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      max-height: 1000px;
+      transform: translateY(0);
+    }
+  }
+
+  /* 从底部滑入（toast 通知） */
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Banner 从上滑入 */
+  @keyframes slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* 脉冲环（运行中状态） */
+  @keyframes pulse-ring {
+    0% {
+      box-shadow: 0 0 0 0 rgba(88, 166, 255, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 6px rgba(88, 166, 255, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(88, 166, 255, 0);
+    }
+  }
+
+  /* ============ 动画工具类 ============ */
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 0.35s ease-out;
+  }
+  .animate-fade-in-down {
+    animation: fade-in-down 0.3s ease-out;
+  }
+  .animate-scale-in {
+    animation: scale-in 0.2s ease-out;
+  }
+  .animate-slide-in-right {
+    animation: slide-in-right 0.25s ease-out;
+  }
+  .animate-slide-in-left {
+    animation: slide-in-left 0.25s ease-out;
+  }
+  .animate-glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+  .animate-gradient-flow {
+    background-size: 200% 200%;
+    animation: gradient-flow 4s ease-in-out infinite;
+  }
+  .animate-shake {
+    animation: shake 0.4s ease-in-out;
+  }
+  .animate-bounce-in {
+    animation: bounce-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  .animate-expand-down {
+    animation: expand-down 0.25s ease-out;
+  }
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+  .animate-slide-down {
+    animation: slide-down 0.3s ease-out;
+  }
+  .animate-pulse-ring {
+    animation: pulse-ring 1.5s ease-out infinite;
+  }
+
+  /* 打字指示器三点（配合 .typing-dot:nth-child 延迟） */
+  .typing-dot {
+    animation: typing-dot 1.2s ease-in-out infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+  /* 进度条条纹 */
+  .progress-stripe {
+    background-image: linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.15) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.15) 75%,
+      transparent 75%,
+      transparent
+    );
+    background-size: 40px 40px;
+    animation: progress-stripe 1s linear infinite;
+  }
+
+  /* 骨架屏 */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(48, 54, 61, 0.3) 25%,
+      rgba(48, 54, 61, 0.6) 50%,
+      rgba(48, 54, 61, 0.3) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  /* ============ 现代化动画 ============ */
+
+  /* 弹簧曲线变量（自然、流畅，非机械线性） */
+  --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --spring-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --spring-decel: cubic-bezier(0, 0.55, 0.45, 1);
+
+  /* 弹簧上滑（消息出现，带回弹） */
+  @keyframes spring-up {
+    0% {
+      opacity: 0;
+      transform: translateY(16px) scale(0.96);
+    }
+    60% {
+      opacity: 1;
+      transform: translateY(-2px) scale(1.01);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* 弹簧缩放（弹窗、卡片） */
+  @keyframes spring-scale {
+    0% {
+      opacity: 0;
+      transform: scale(0.85);
+    }
+    55% {
+      opacity: 1;
+      transform: scale(1.03);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  /* 3D 翻转进入 */
+  @keyframes flip-in {
+    0% {
+      opacity: 0;
+      transform: perspective(800px) rotateX(-12deg) translateY(8px);
+    }
+    100% {
+      opacity: 1;
+      transform: perspective(800px) rotateX(0) translateY(0);
+    }
+  }
+
+  /* 模糊淡入（现代感） */
+  @keyframes blur-in {
+    0% {
+      opacity: 0;
+      filter: blur(8px);
+      transform: scale(0.98);
+    }
+    100% {
+      opacity: 1;
+      filter: blur(0);
+      transform: scale(1);
+    }
+  }
+
+  /* 从左侧弹簧滑入（列表项） */
+  @keyframes spring-slide-left {
+    0% {
+      opacity: 0;
+      transform: translateX(-24px);
+    }
+    60% {
+      opacity: 1;
+      transform: translateX(3px);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  /* 渐变光扫过（卡片悬停） */
+  @keyframes shine-sweep {
+    0% { transform: translateX(-100%) skewX(-15deg); }
+    100% { transform: translateX(200%) skewX(-15deg); }
+  }
+
+  /* 浮动（装饰元素） */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  /* 渐变旋转（加载圈） */
+  @keyframes spin-gradient {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* 波纹扩散（点击反馈） */
+  @keyframes ripple {
+    0% {
+      transform: scale(0);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+
+  /* 数字滚动（统计数字） */
+  @keyframes count-up {
+    0% {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* 边框流光（聚焦状态） */
+  @keyframes border-glow {
+    0%, 100% {
+      border-color: rgba(88, 166, 255, 0.3);
+      box-shadow: 0 0 0 0 rgba(88, 166, 255, 0);
+    }
+    50% {
+      border-color: rgba(88, 166, 255, 0.6);
+      box-shadow: 0 0 8px 1px rgba(88, 166, 255, 0.15);
+    }
+  }
+
+  /* 背景渐变流动（mesh gradient） */
+  @keyframes mesh-flow {
+    0%, 100% {
+      background-position: 0% 50%, 100% 50%;
+    }
+    50% {
+      background-position: 100% 50%, 0% 50%;
+    }
+  }
+
+  /* ============ 现代化动画工具类 ============ */
+
+  /* 弹簧动画（自然回弹） */
+  .animate-spring-up {
+    animation: spring-up 0.5s var(--spring-bounce);
+  }
+  .animate-spring-scale {
+    animation: spring-scale 0.4s var(--spring-bounce);
+  }
+  .animate-spring-slide-left {
+    animation: spring-slide-left 0.4s var(--spring-bounce);
+  }
+
+  /* 模糊淡入 */
+  .animate-blur-in {
+    animation: blur-in 0.4s var(--spring-smooth);
+  }
+
+  /* 3D 翻转 */
+  .animate-flip-in {
+    animation: flip-in 0.5s var(--spring-smooth);
+  }
+
+  /* 浮动装饰 */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* 渐变旋转 */
+  .animate-spin-gradient {
+    animation: spin-gradient 1.2s linear infinite;
+  }
+
+  /* 边框流光 */
+  .animate-border-glow {
+    animation: border-glow 2.5s ease-in-out infinite;
+  }
+
+  /* 数字滚动 */
+  .animate-count-up {
+    animation: count-up 0.6s var(--spring-decel);
+  }
+
+  /* ============ 交错动画（列表项依次出现） ============ */
+  .stagger-item {
+    opacity: 1;
+    animation: spring-slide-left 0.4s var(--spring-bounce);
+  }
+  .stagger-item:nth-child(1) { animation-delay: 0.02s; }
+  .stagger-item:nth-child(2) { animation-delay: 0.06s; }
+  .stagger-item:nth-child(3) { animation-delay: 0.10s; }
+  .stagger-item:nth-child(4) { animation-delay: 0.14s; }
+  .stagger-item:nth-child(5) { animation-delay: 0.18s; }
+  .stagger-item:nth-child(6) { animation-delay: 0.22s; }
+  .stagger-item:nth-child(7) { animation-delay: 0.26s; }
+  .stagger-item:nth-child(8) { animation-delay: 0.30s; }
+  .stagger-item:nth-child(9) { animation-delay: 0.34s; }
+  .stagger-item:nth-child(10) { animation-delay: 0.38s; }
+  .stagger-item:nth-child(n+11) { animation-delay: 0.42s; }
+
+  /* 垂直弹簧交错（模态框列表卡片，自上而下依次浮入，带回弹） */
+  .stagger-up {
+    opacity: 1;
+    animation: spring-up 0.45s var(--spring-bounce);
+  }
+  .stagger-up:nth-child(1) { animation-delay: 0.03s; }
+  .stagger-up:nth-child(2) { animation-delay: 0.07s; }
+  .stagger-up:nth-child(3) { animation-delay: 0.11s; }
+  .stagger-up:nth-child(4) { animation-delay: 0.15s; }
+  .stagger-up:nth-child(5) { animation-delay: 0.19s; }
+  .stagger-up:nth-child(6) { animation-delay: 0.23s; }
+  .stagger-up:nth-child(7) { animation-delay: 0.27s; }
+  .stagger-up:nth-child(8) { animation-delay: 0.31s; }
+  .stagger-up:nth-child(n+9) { animation-delay: 0.35s; }
+
+  /* ============ 微交互 ============ */
+
+  /* 按钮按压回弹 */
+  .btn-press {
+    transition: transform 0.15s var(--spring-bounce);
+  }
+  .btn-press:active {
+    transform: scale(0.95);
+  }
+
+  /* 卡片悬停浮起 */
+  .card-hover {
+    transition: transform 0.3s var(--spring-smooth), box-shadow 0.3s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  /* 玻璃拟态 */
+  .glass {
+    background: rgba(22, 27, 34, 0.65);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(48, 54, 61, 0.5);
+  }
+
+  /* 光扫效果（悬停时） */
+  .shine-on-hover {
+    position: relative;
+    overflow: hidden;
+  }
+  .shine-on-hover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.06),
+      transparent
+    );
+    transform: translateX(-100%) skewX(-15deg);
+    pointer-events: none;
+  }
+  .shine-on-hover:hover::after {
+    animation: shine-sweep 0.7s ease;
+  }
+
+  /* 渐变文字 */
+  .text-gradient {
+    background: linear-gradient(135deg, #58a6ff, #bc8cff, #f778ba);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: mesh-flow 5s ease-in-out infinite;
+  }
+}

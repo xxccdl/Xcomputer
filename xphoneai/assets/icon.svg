@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#58a6ff"/>
+      <stop offset="100%" stop-color="#79c0ff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 圆角方形背景 -->
+  <rect x="28" y="28" width="456" height="456" rx="108" fill="#0d1117"/>
+
+  <!-- 边框 -->
+  <rect x="28" y="28" width="456" height="456" rx="108" fill="none" stroke="#21262d" stroke-width="2"/>
+
+  <!-- 手机外框 -->
+  <path d="M166,80 L346,80 C361,80 372,91 372,106 L372,406 C372,421 361,432 346,432 L166,432 C151,432 140,421 140,406 L140,106 C140,91 151,80 166,80 Z" fill="none" stroke="url(#accent)" stroke-width="5"/>
+
+  <!-- 屏幕 -->
+  <rect x="156" y="112" width="200" height="292" rx="20" fill="#0d1117"/>
+
+  <!-- AI 脑波形（3条横线） -->
+  <g opacity="0.5" stroke="#58a6ff" stroke-width="3" stroke-linecap="round">
+    <line x1="194" y1="210" x2="318" y2="210"/>
+    <line x1="194" y1="256" x2="318" y2="256"/>
+    <line x1="194" y1="302" x2="318" y2="302"/>
+  </g>
+
+  <!-- 中心发光圆 -->
+  <circle cx="256" cy="256" r="24" fill="url(#accent)" opacity="0.15"/>
+  <circle cx="256" cy="256" r="11" fill="url(#accent)"/>
+  <circle cx="256" cy="256" r="5" fill="#fff" opacity="0.85"/>
+
+  <!-- 四个方向节点 -->
+  <g fill="url(#accent)" opacity="0.6">
+    <circle cx="256" cy="172" r="6"/>
+    <line x1="256" y1="178" x2="256" y2="232" stroke="#58a6ff" stroke-width="1.5" opacity="0.2"/>
+
+    <circle cx="256" cy="340" r="6"/>
+    <line x1="256" y1="334" x2="256" y2="280" stroke="#58a6ff" stroke-width="1.5" opacity="0.2"/>
+
+    <circle cx="172" cy="256" r="6"/>
+    <line x1="178" y1="256" x2="232" y2="256" stroke="#58a6ff" stroke-width="1.5" opacity="0.2"/>
+
+    <circle cx="340" cy="256" r="6"/>
+    <line x1="334" y1="256" x2="280" y2="256" stroke="#58a6ff" stroke-width="1.5" opacity="0.2"/>
+  </g>
+
+  <!-- 听筒 -->
+  <rect x="226" y="92" width="60" height="5" rx="2.5" fill="#58a6ff" opacity="0.25"/>
+</svg>

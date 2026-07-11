@@ -1,0 +1,143 @@
+{
+  "name": "xcomputer",
+  "version": "0.2.54",
+  "description": "Xcomputer by xxccdl — AI 桌面自动化助手，一句话让 AI 操控你的电脑",
+  "main": "./out/main/index.js",
+  "author": "xxccdl",
+  "license": "MIT",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
+    "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "lint": "eslint src --ext .ts,.tsx",
+    "setup:mcp": "powershell -ExecutionPolicy Bypass -File scripts/setup-mcp.ps1",
+    "dist": "node build/patch-nsis.js && npm run build && electron-builder"
+  },
+  "dependencies": {
+    "@electron-toolkit/preload": "^3.0.1",
+    "@electron-toolkit/utils": "^3.0.0",
+    "@huggingface/tokenizers": "^0.1.3",
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@types/form-data": "^2.2.1",
+    "@types/qrcode": "^1.5.6",
+    "@types/ws": "^8.18.1",
+    "adm-zip": "^0.5.17",
+    "clsx": "^2.1.1",
+    "electron-log": "^5.1.5",
+    "electron-store": "^8.2.0",
+    "form-data": "^4.0.6",
+    "lucide-react": "^0.400.0",
+    "node-llama-cpp": "^3.19.0",
+    "openai": "^4.55.0",
+    "png-to-ico": "^3.0.1",
+    "qrcode": "^1.5.4",
+    "react-markdown": "^10.1.0",
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1",
+    "sharp": "^0.35.2",
+    "ws": "^8.21.0",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.8",
+    "@types/node": "^20.14.10",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3",
+    "electron-vite": "^2.3.0",
+    "postcss": "^8.4.39",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.5.0",
+    "vite": "^5.3.0"
+  },
+  "build": {
+    "appId": "com.xxccdl.xcomputer",
+    "productName": "Xcomputer",
+    "directories": {
+      "output": "dist-release-v5"
+    },
+    "files": [
+      "out/**/*",
+      "!**/*.map",
+      "!node_modules/@node-llama-cpp/win-arm64/**",
+      "!node_modules/@node-llama-cpp/win-x64-cuda-ext/**",
+      "!node_modules/@node-llama-cpp/win-x64-vulkan/**"
+    ],
+    "asarUnpack": [
+      "node_modules/node-llama-cpp/**",
+      "node_modules/@node-llama-cpp/**"
+    ],
+    "extraResources": [
+      {
+        "from": "python",
+        "to": "python",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": ".venv",
+        "to": ".venv",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "build",
+        "to": "build",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "resources/builtin-skills",
+        "to": "builtin-skills",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "resources/deepseek-tokenizer",
+        "to": "deepseek-tokenizer",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "resources/local-models",
+        "to": "local-models",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "resources/requirements-mcp.txt",
+        "to": "requirements-mcp.txt"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "artifactName": "${productName}-${version}-setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "include": "build/nsis-installer.nsh"
+    }
+  },
+  "allowScripts": {
+    "electron": true,
+    "esbuild": true,
+    "node-llama-cpp@3.19.0": true
+  }
+}

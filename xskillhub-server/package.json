@@ -1,0 +1,26 @@
+{
+  "name": "xskillhub-server",
+  "version": "1.0.0",
+  "description": "XSkillHub 技能市场平台后端服务，为 Xcomputer 应用提供技能分享、下载和发布能力",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
+    "uuid": "^10.0.0",
+    "ws": "^8.21.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "comments": {
+    "note": "使用 Node.js 内置的 node:sqlite 模块替代 better-sqlite3，避免原生编译依赖。node:sqlite 在 Node 22+ 中可用，API 与 better-sqlite3 高度一致。"
+  }
+}

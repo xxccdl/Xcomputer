@@ -1,0 +1,23 @@
+{
+  "name": "xcomputer-trailer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "remotion studio",
+    "build": "remotion render Trailer out/trailer.mp4",
+    "preview": "remotion preview"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.295",
+    "@remotion/google-fonts": "4.0.295",
+    "@remotion/shapes": "4.0.295",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.295"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "typescript": "5.8.3"
+  }
+}

@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xcomputer — 一句话让 AI 操控你的电脑</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent-hover: #79c0ff;
+    --text: #c9d1d9;
+    --text-primary: #f0f6fc;
+    --text-muted: #8b949e;
+    --success: #3fb950;
+    --danger: #f85149;
+    --purple: #bc8cff;
+  }
+  body {
+    font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    padding: 100px 0 80px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: 50%;
+    transform: translateX(-50%);
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, rgba(88,166,255,0.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: rgba(88,166,255,0.08);
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 32px;
+  }
+  .hero-badge .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 8px var(--success);
+  }
+  .hero-logo {
+    width: 88px; height: 88px;
+    margin: 0 auto 28px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; font-weight: 800; color: white;
+    box-shadow: 0 20px 60px rgba(88,166,255,0.4);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .hero h1 {
+    font-size: 52px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero .subtitle {
+    font-size: 20px;
+    color: var(--text-muted);
+    max-width: 640px;
+    margin: 0 auto 40px;
+  }
+  .hero-tags {
+    display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+  }
+  .tag {
+    padding: 8px 18px;
+    border-radius: 999px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--text);
+  }
+  .tag.accent { background: rgba(88,166,255,0.1); border-color: rgba(88,166,255,0.3); color: var(--accent); }
+
+  /* Section */
+  section { padding: 72px 0; }
+  .section-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .section-desc {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 16px;
+    margin-bottom: 48px;
+  }
+
+  /* 痛点卡片 */
+  .pain-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .pain-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: all 0.3s;
+  }
+  .pain-card:hover {
+    border-color: rgba(88,166,255,0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .pain-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: rgba(248,81,73,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  .pain-card h3 { color: var(--text-primary); font-size: 18px; margin-bottom: 10px; }
+  .pain-card p { color: var(--text-muted); font-size: 14px; }
+
+  /* 解决方案 */
+  .solution-box {
+    background: linear-gradient(135deg, rgba(88,166,255,0.08), rgba(188,140,255,0.05));
+    border: 1px solid rgba(88,166,255,0.2);
+    border-radius: 20px;
+    padding: 48px;
+    text-align: center;
+  }
+  .solution-box .big-text {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+  }
+  .solution-box .big-text .highlight {
+    color: var(--accent);
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* 功能网格 */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+  .feature-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.3s;
+  }
+  .feature-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 8px 30px rgba(88,166,255,0.15);
+  }
+  .feature-icon {
+    width: 44px; height: 44px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, rgba(88,166,255,0.2), rgba(88,166,255,0.05));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 14px;
+  }
+  .feature-card h3 { color: var(--text-primary); font-size: 16px; margin-bottom: 8px; }
+  .feature-card p { color: var(--text-muted); font-size: 13px; }
+
+  /* 界面预览 */
+  .preview-wrapper {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .preview-titlebar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .preview-titlebar .dots { display: flex; gap: 6px; }
+  .preview-titlebar .dots span {
+    width: 12px; height: 12px; border-radius: 50%;
+  }
+  .preview-titlebar .dots .r { background: #ff5f57; }
+  .preview-titlebar .dots .y { background: #febc2e; }
+  .preview-titlebar .dots .g { background: #28c840; }
+  .preview-titlebar .title {
+    font-size: 13px; color: var(--text-muted);
+    font-family: monospace;
+  }
+  .preview-body {
+    display: grid;
+    grid-template-columns: 220px 1fr 280px;
+    height: 420px;
+  }
+  .preview-sidebar {
+    background: var(--bg);
+    border-right: 1px solid var(--border);
+    padding: 16px 12px;
+    display: flex; flex-direction: column;
+  }
+  .preview-new-btn {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: rgba(88,166,255,0.08);
+    color: var(--text-primary);
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .preview-session {
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .preview-session.active {
+    background: var(--panel);
+    color: var(--text-primary);
+    border-left: 2px solid var(--accent);
+  }
+  .preview-status {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex; justify-content: space-between;
+  }
+  .preview-status .dot {
+    display: inline-block; width: 7px; height: 7px;
+    border-radius: 50%; margin-right: 4px;
+  }
+  .preview-main {
+    padding: 20px;
+    display: flex; flex-direction: column;
+  }
+  .preview-msg {
+    margin-bottom: 16px;
+    display: flex; gap: 10px;
+  }
+  .preview-msg.user { flex-direction: row-reverse; }
+  .preview-avatar {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+  }
+  .preview-avatar.ai { background: rgba(88,166,255,0.2); color: var(--accent); }
+  .preview-avatar.user { background: var(--panel); color: var(--text-muted); }
+  .preview-bubble {
+    max-width: 70%;
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+  }
+  .preview-bubble.ai {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .preview-bubble.user {
+    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    color: white;
+  }
+  .preview-step {
+    margin: 8px 0 8px 38px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(63,185,80,0.06);
+    border-left: 2px solid var(--success);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .preview-step .check { color: var(--success); margin-right: 6px; }
+  .preview-input {
+    margin-top: auto;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .preview-input .send {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: white;
+  }
+  .preview-detail {
+    background: var(--bg);
+    border-left: 1px solid var(--border);
+    padding: 16px;
+  }
+  .preview-detail h4 {
+    font-size: 12px; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  .preview-timeline-item {
+    padding: 8px 0;
+    border-left: 2px solid var(--border);
+    padding-left: 14px;
+    margin-left: 4px;
+    font-size: 12px;
+    position: relative;
+  }
+  .preview-timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -5px; top: 12px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .preview-timeline-item.done::before { background: var(--success); }
+  .preview-timeline-item .label { color: var(--text); font-weight: 500; }
+  .preview-timeline-item .time { color: var(--text-muted); font-size: 11px; }
+
+  /* 架构 */
+  .arch-flow {
+    display: flex; flex-direction: column; gap: 16px;
+    align-items: center;
+  }
+  .arch-layer {
+    width: 100%;
+    max-width: 700px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 28px;
+    display: flex; align-items: center; gap: 20px;
+    transition: all 0.3s;
+  }
+  .arch-layer:hover {
+    border-color: var(--accent);
+    transform: scale(1.02);
+  }
+  .arch-layer .icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .arch-layer .info h3 { color: var(--text-primary); font-size: 16px; margin-bottom: 4px; }
+  .arch-layer .info p { color: var(--text-muted); font-size: 13px; }
+  .arch-arrow {
+    color: var(--text-muted);
+    font-size: 20px;
+  }
+
+  /* 场景 */
+  .scenario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  .scenario-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .scenario-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 100px; height: 100px;
+    background: radial-gradient(circle, rgba(88,166,255,0.08), transparent 70%);
+  }
+  .scenario-card .num {
+    font-size: 40px;
+    font-weight: 800;
+    color: rgba(88,166,255,0.15);
+    font-family: monospace;
+    margin-bottom: 8px;
+  }
+  .scenario-card h3 { color: var(--text-primary); font-size: 18px; margin-bottom: 10px; }
+  .scenario-card .cmd {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    margin: 12px 0;
+  }
+  .scenario-card p { color: var(--text-muted); font-size: 14px; }
+
+  /* 价值 */
+  .value-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .value-card {
+    background: linear-gradient(135deg, var(--panel), rgba(88,166,255,0.03));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+  }
+  .value-card .icon {
+    font-size: 36px;
+    margin-bottom: 16px;
+  }
+  .value-card h3 { color: var(--text-primary); font-size: 20px; margin-bottom: 10px; }
+  .value-card p { color: var(--text-muted); font-size: 14px; }
+  .value-card .metric {
+    margin-top: 16px;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+  .value-card .metric-label { font-size: 12px; color: var(--text-muted); }
+
+  /* Footer */
+  footer {
+    padding: 48px 0;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+  footer p { color: var(--text-muted); font-size: 14px; }
+  footer .logo {
+    font-family: monospace;
+    font-size: 24px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .hero-logo { animation: float 4s ease-in-out infinite; }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .hero-badge .dot { animation: pulse-dot 2s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      学习工作赛道 · AI 桌面自动化
+    </div>
+    <div class="hero-logo">X</div>
+    <h1>Xcomputer</h1>
+    <p class="subtitle">一句话，让 AI 操控你的电脑。<br>自然语言驱动，自动执行办公、系统管理、文件操作等任务。</p>
+    <div class="hero-tags">
+      <span class="tag accent">Electron</span>
+      <span class="tag">DeepSeek AI</span>
+      <span class="tag">Windows-MCP</span>
+      <span class="tag">ReAct Agent</span>
+      <span class="tag">TypeScript</span>
+    </div>
+  </div>
+</div>
+
+<!-- 痛点 -->
+<section>
+  <div class="container">
+    <h2 class="section-title">没有 Xcomputer，你遇到这些麻烦</h2>
+    <p class="section-desc">日常办公中重复、繁琐的电脑操作，正在浪费你的时间</p>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="pain-icon">😩</div>
+        <h3>重复操作繁琐</h3>
+        <p>每天打开相同的应用、整理相同的文件、填写相同的表格，机械重复消耗精力，却不得不手动一步步点。</p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">🔄</div>
+        <h3>跨应用操作断裂</h3>
+        <p>从浏览器复制内容到 Word，再截图发到微信，需要在多个窗口间反复切换，操作连贯性差，容易出错。</p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">⚙️</div>
+        <h3>系统操作门槛高</h3>
+        <p>清理临时文件、管理进程、配置系统设置，对非技术用户来说命令行和注册表如同天书，望而却步。</p>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">📝</div>
+        <h3>批量任务低效</h3>
+        <p>批量重命名 100 个文件、整理项目目录、导出多份报表，没有脚本能力只能逐个手动处理，效率极低。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 解决方案 -->
+<section>
+  <div class="container">
+    <div class="solution-box">
+      <p class="big-text">只需 <span class="highlight">一句话</span>，AI 自动完成所有操作</p>
+      <p style="color: var(--text-muted); font-size: 16px; max-width: 600px; margin: 0 auto;">
+        Xcomputer 将自然语言指令转化为一系列电脑操作步骤，AI 自主规划、调用工具、观察结果、循环执行，直到任务完成。用户无需编程，无需记忆命令，像和同事说话一样指挥电脑。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 核心功能 -->
+<section>
+  <div class="container">
+    <h2 class="section-title">核心功能</h2>
+    <p class="section-desc">双模型协同 + 21 个工具，覆盖桌面操作全场景</p>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🗣️</div>
+        <h3>自然语言理解</h3>
+        <p>DeepSeek-V4-Flash 快速识别意图，判断是闲聊还是任务，毫秒级响应。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3>ReAct 智能规划</h3>
+        <p>DeepSeek-V4-Pro 作为 Agent，思考-行动-观察循环，最多 20 轮自主决策。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🖱️</div>
+        <h3>桌面 UI 操控</h3>
+        <p>19 个 MCP 工具：点击、输入、截图、快照、应用管理、剪贴板等全覆盖。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📁</div>
+        <h3>文件操作引擎</h3>
+        <p>本地 File 工具：读写、搜索、批量处理，支持通配符和递归，比手动快百倍。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💻</div>
+        <h3>后台终端管理</h3>
+        <p>创建多个后台终端，发送命令和按键，运行编译、Git、服务，AI 实时读取输出。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <h3>高危操作确认</h3>
+        <p>删除文件、注册表修改、进程终止等操作自动弹出确认，安全可控。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 界面预览 -->
+<section>
+  <div class="container">
+    <h2 class="section-title">产品界面</h2>
+    <p class="section-desc">三栏 IDE 风格，深色 GitHub 主题，任务步骤可视化</p>
+    <div class="preview-wrapper">
+      <div class="preview-titlebar">
+        <div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <span class="title">Xcomputer — AI 桌面助手</span>
+      </div>
+      <div class="preview-body">
+        <!-- 侧边栏 -->
+        <div class="preview-sidebar">
+          <div class="preview-new-btn">+ 新建会话</div>
+          <div class="preview-session active">打开记事本写一首诗</div>
+          <div class="preview-session">整理桌面文件</div>
+          <div class="preview-session">截取当前屏幕</div>
+          <div class="preview-session">查询系统信息</div>
+          <div class="preview-status">
+            <span><span class="dot" style="background:var(--accent)"></span>deepseek-v4</span>
+            <span><span class="dot" style="background:var(--success)"></span>MCP 已连接</span>
+          </div>
+        </div>
+        <!-- 主面板 -->
+        <div class="preview-main">
+          <div class="preview-msg user">
+            <div class="preview-avatar user">我</div>
+            <div class="preview-bubble user">打开记事本写一首诗</div>
+          </div>
+          <div class="preview-msg">
+            <div class="preview-avatar ai">✦</div>
+            <div class="preview-bubble ai">好的，我来帮你打开记事本并写一首诗。</div>
+          </div>
+          <div class="preview-step"><span class="check">✓</span>App open: notepad.exe</div>
+          <div class="preview-step"><span class="check">✓</span>Type: 春眠不觉晓，处处闻啼鸟...</div>
+          <div class="preview-msg">
+            <div class="preview-avatar ai">✦</div>
+            <div class="preview-bubble ai">已完成！记事本已打开并写入《春晓》，共 4 句诗。</div>
+          </div>
+          <div class="preview-input">
+            <span>输入指令... (Enter 发送)</span>
+            <span class="send">↑</span>
+          </div>
+        </div>
+        <!-- 详情面板 -->
+        <div class="preview-detail">
+          <h4>任务时间线</h4>
+          <div class="preview-timeline-item done">
+            <div class="label">意图分类</div>
+            <div class="time">task · 0.3s</div>
+          </div>
+          <div class="preview-timeline-item done">
+            <div class="label">打开记事本</div>
+            <div class="time">App · 1.2s</div>
+          </div>
+          <div class="preview-timeline-item done">
+            <div class="label">输入诗歌内容</div>
+            <div class="time">Type · 0.8s</div>
+          </div>
+          <div class="preview-timeline-item">
+            <div class="label">任务完成</div>
+            <div class="time">总结回复</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 技术架构 -->
+<section>
+  <div class="container">
+    <h2 class="section-title">技术架构</h2>
+    <p class="section-desc">Electron 三进程架构，AI 与 MCP 协同，安全隔离</p>
+    <div class="arch-flow">
+      <div class="arch-layer">
+        <div class="icon" style="background:rgba(88,166,255,0.15)">🎨</div>
+        <div class="info">
+          <h3>渲染进程（React + Tailwind）</h3>
+          <p>三栏 IDE 风格 UI · Zustand 状态管理 · 流式 Markdown 渲染 · 任务步骤可视化</p>
+        </div>
+      </div>
+      <div class="arch-arrow">↕ contextBridge 安全 IPC</div>
+      <div class="arch-layer">
+        <div class="icon" style="background:rgba(188,140,255,0.15)">⚙️</div>
+        <div class="info">
+          <h3>主进程（Task Orchestrator）</h3>
+          <p>ReAct Agent 循环 · 意图分类 · 高危确认 · 会话持久化 · 工具路由分发</p>
+        </div>
+      </div>
+      <div class="arch-arrow">↕ 双向通信</div>
+      <div class="arch-layer">
+        <div class="icon" style="background:rgba(63,185,80,0.15)">🤖</div>
+        <div class="info">
+          <h3>AI 服务（DeepSeek 双模型）</h3>
+          <p>V4-Flash 意图分类（快） · V4-Pro 工具循环（强） · OpenAI 兼容协议 · 流式输出</p>
+        </div>
+      </div>
+      <div class="arch-arrow">↕ JSON-RPC stdio</div>
+      <div class="arch-layer">
+        <div class="icon" style="background:rgba(248,145,73,0.15)">🔧</div>
+        <div class="info">
+          <h3>工具层（MCP + 本地工具）</h3>
+          <p>Windows-MCP 19 工具（UIA 操控） · 本地 File 工具 · 本地 Terminal 工具 · 项目内自带 Python+uv</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 使用场景 -->
+<section>
+  <div class="container">
+    <h2 class="section-title">使用场景</h2>
+    <p class="section-desc">一句话指令，AI 自动执行完整流程</p>
+    <div class="scenario-grid">
+      <div class="scenario-card">
+        <div class="num">01</div>
+        <h3>办公自动化</h3>
+        <div class="cmd">"打开 Word，把上周的会议纪要整理成表格"</div>
+        <p>AI 自动打开 Word → 定位文档 → 提取内容 → 创建表格 → 填入数据，全程无需手动操作。</p>
+      </div>
+      <div class="scenario-card">
+        <div class="num">02</div>
+        <h3>文件批量处理</h3>
+        <div class="cmd">"把桌面的截图按日期分类到文件夹"</div>
+        <p>AI 读取文件信息 → 按修改日期分组 → 创建目录 → 移动文件，100 个文件 10 秒完成。</p>
+      </div>
+      <div class="scenario-card">
+        <div class="num">03</div>
+        <h3>系统维护</h3>
+        <div class="cmd">"清理临时文件夹并查看磁盘空间"</div>
+        <p>AI 创建后台终端 → 运行清理命令 → 读取输出 → 汇报结果，非技术用户也能轻松维护系统。</p>
+      </div>
+      <div class="scenario-card">
+        <div class="num">04</div>
+        <h3>开发辅助</h3>
+        <div class="cmd">"在这个项目里搜索所有 TODO 注释"</div>
+        <p>AI 用本地 File 工具递归搜索 → 汇总结果 → 按文件分组展示，比手动 grep 更直观。</p>
+      </div>
+      <div class="scenario-card">
+        <div class="num">05</div>
+        <h3>跨应用协作</h3>
+        <div class="cmd">"把浏览器里的表格复制到 Excel"</div>
+        <p>AI 截图/快照浏览器 → 提取表格数据 → 打开 Excel → 输入内容，跨应用操作连贯无断点。</p>
+      </div>
+      <div class="scenario-card">
+        <div class="num">06</div>
+        <h3>信息查询</h3>
+        <div class="cmd">"看看我电脑配置和运行状态"</div>
+        <p>AI 调用系统工具 → 收集 CPU/内存/磁盘信息 → 格式化汇报，一键了解电脑状况。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 价值 -->
+<section>
+  <div class="container">
+    <h2 class="section-title">价值与意义</h2>
+    <p class="section-desc">让每个人都能用自然语言驾驭电脑</p>
+    <div class="value-grid">
+      <div class="value-card">
+        <div class="icon">⚡</div>
+        <h3>效率提升</h3>
+        <p>将重复性电脑操作从"手动多步"变为"一句话一步"。原本需要 10 分钟的文件整理，现在 10 秒指令即可完成。AI 7×24 不知疲倦，释放人力专注创造性工作。</p>
+        <div class="metric">10x</div>
+        <div class="metric-label">操作效率提升</div>
+      </div>
+      <div class="value-card">
+        <div class="icon">🌍</div>
+        <h3>社会价值</h3>
+        <p>降低电脑使用门槛，让老人、残障人士、非技术用户都能通过自然语言完成复杂操作。无需学习命令行和快捷键，消除数字鸿沟，让技术真正服务于每一个人。</p>
+        <div class="metric">0</div>
+        <div class="metric-label">学习门槛（零编程）</div>
+      </div>
+      <div class="value-card">
+        <div class="icon">💼</div>
+        <h3>商业价值</h3>
+        <p>企业可集成到办公流程，自动化报表生成、数据录入、系统巡检等任务。减少重复劳动成本，员工专注高价值工作。SaaS 化潜力大，按调用次数计费。</p>
+        <div class="metric">80%</div>
+        <div class="metric-label">重复任务可自动化</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="logo">Xcomputer-made by xxccdl with TRAE IDE</div>
+    <p>一句话，让 AI 操控你的电脑</p>
+    <p style="margin-top:8px; font-size:12px;">学习工作赛道 · Electron + DeepSeek AI + Windows-MCP</p>
+  </div>
+</footer>
+
+</body>
+</html>

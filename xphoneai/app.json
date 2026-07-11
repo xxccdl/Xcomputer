@@ -1,0 +1,74 @@
+{
+  "expo": {
+    "name": "xphoneai",
+    "slug": "xphoneai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "xphoneai",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0d1117"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.xxccdl.xphoneai"
+    },
+    "android": {
+      "package": "com.xxccdl.xphoneai",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0d1117"
+      },
+      "permissions": [
+        "ACCESSIBILITY_SERVICE",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "RECORD_AUDIO",
+        "SEND_SMS",
+        "VIBRATE",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "FOREGROUND_SERVICE",
+        "POST_NOTIFICATIONS",
+        "USE_BIOMETRIC",
+        "WAKE_LOCK",
+        "RECEIVE_BOOT_COMPLETED",
+        "SCHEDULE_EXACT_ALARM"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "允许xphoneai获取位置信息"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "允许xphoneai使用摄像头"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "notificationPermission": "允许xphoneai发送通知"
+        }
+      ],
+      "expo-font",
+      "expo-asset",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      }
+    }
+  }
+}

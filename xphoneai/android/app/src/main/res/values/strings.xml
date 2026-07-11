@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">xphoneai</string>
+    <string name="accessibility_service_description">xphoneai 无障碍服务：允许 AI 操控手机，提供截屏、点击、输入、滑动等UI自动化能力。开启后AI可通过电脑端远程控制手机。</string>
+</resources>

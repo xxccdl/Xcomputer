@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============ CSS 变量定义主题色 ============ */
+:root {
+  --bg-base: #0a0e14;
+  --bg-panel: #161b22;
+  --bg-hover: #1c2128;
+  --border-default: #30363d;
+  --border-muted: #21262d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #6e7681;
+  --accent-blue: #2f81f7;
+  --accent-purple: #a371f7;
+}
+
+/* ============ 基础样式 ============ */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Space Grotesk', -apple-system, 'Segoe UI', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ============ 自定义工具类 ============ */
+@layer components {
+  /* 玻璃拟态卡片 */
+  .glass-card {
+    background: rgba(22, 27, 34, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-default);
+    border-radius: 12px;
+    transition: all 0.25s ease;
+  }
+
+  .glass-card:hover {
+    border-color: rgba(47, 129, 247, 0.5);
+    box-shadow: 0 8px 32px rgba(47, 129, 247, 0.15), 0 8px 32px rgba(163, 113, 247, 0.1);
+    transform: translateY(-4px);
+  }
+
+  /* 渐变文字 */
+  .gradient-text {
+    background: linear-gradient(135deg, #2f81f7 0%, #a371f7 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* 渐变按钮 */
+  .btn-gradient {
+    background: linear-gradient(135deg, #2f81f7 0%, #a371f7 100%);
+    color: #ffffff;
+    transition: all 0.2s ease;
+  }
+
+  .btn-gradient:hover {
+    box-shadow: 0 0 24px rgba(47, 129, 247, 0.45), 0 0 24px rgba(163, 113, 247, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .btn-gradient:active {
+    transform: translateY(0);
+  }
+
+  /* 输入框样式 */
+  .input-base {
+    background-color: var(--bg-input, #010409);
+    border: 1px solid var(--border-default);
+    border-radius: 8px;
+    color: var(--text-primary);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .input-base:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(47, 129, 247, 0.2);
+  }
+}
+
+/* ============ 动画 ============ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+/* 错峰入场动画 */
+.stagger-1 { animation-delay: 0.05s; opacity: 0; }
+.stagger-2 { animation-delay: 0.1s; opacity: 0; }
+.stagger-3 { animation-delay: 0.15s; opacity: 0; }
+.stagger-4 { animation-delay: 0.2s; opacity: 0; }
+.stagger-5 { animation-delay: 0.25s; opacity: 0; }
+.stagger-6 { animation-delay: 0.3s; opacity: 0; }
+
+/* ============ 滚动条样式 ============ */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 6px;
+  border: 2px solid var(--bg-base);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
+
+/* ============ 选中文本 ============ */
+::selection {
+  background: rgba(47, 129, 247, 0.3);
+  color: var(--text-primary);
+}
+
+/* ============ 背景装饰：网格 + 光晕 ============ */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(48, 54, 61, 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(48, 54, 61, 0.4) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: -1px -1px;
+}
+
+.bg-glow {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(47, 129, 247, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 80% 30%, rgba(163, 113, 247, 0.12) 0%, transparent 40%);
+}

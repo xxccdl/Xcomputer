@@ -1,0 +1,85 @@
+<!-- 主应用图标前景：AI手机概念 -->
+<!-- 108dp画布，安全区域：72x72居中 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 手机机身（圆角矩形） -->
+    <path
+        android:fillColor="#58a6ff"
+        android:pathData="M30,20 L78,20 C83.5,20 88,24.5 88,30 L88,78 C88,83.5 83.5,88 78,88 L30,88 C24.5,88 20,83.5 20,78 L20,30 C20,24.5 24.5,20 30,20 Z" />
+
+    <!-- 手机屏幕（深色内屏） -->
+    <path
+        android:fillColor="#1a1f35"
+        android:pathData="M27,27 L81,27 C82.7,27 84,28.3 84,30 L84,74 C84,75.7 82.7,77 81,77 L27,77 C25.3,77 24,75.7 24,74 L24,30 C24,28.3 25.3,27 27,27 Z" />
+
+    <!-- 屏幕内AI大脑/神经网络图案 -->
+    <!-- 中央节点 -->
+    <path
+        android:fillColor="#58a6ff"
+        android:pathData="M51,48 m-5,0 a5,5 0,1 1,10 0 a5,5 0,1 1,-10 0" />
+
+    <!-- 神经网络连线 -->
+    <path
+        android:strokeColor="#58a6ff"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M51,43 L51,37 L42,35 L42,42" />
+    <path
+        android:strokeColor="#58a6ff"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M51,43 L51,37 L60,35 L60,42" />
+    <path
+        android:strokeColor="#58a6ff"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M51,53 L51,59 L42,61 L42,54" />
+    <path
+        android:strokeColor="#58a6ff"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M51,53 L51,59 L60,61 L60,54" />
+
+    <!-- 神经网络节点 -->
+    <path
+        android:fillColor="#58a6ff"
+        android:pathData="M40,33 m-3,0 a3,3 0,1 1,6 0 a3,3 0,1 1,-6 0" />
+    <path
+        android:fillColor="#58a6ff"
+        android:pathData="M62,33 m-3,0 a3,3 0,1 1,6 0 a3,3 0,1 1,-6 0" />
+    <path
+        android:fillColor="#58a6ff"
+        android:pathData="M40,63 m-3,0 a3,3 0,1 1,6 0 a3,3 0,1 1,-6 0" />
+    <path
+        android:fillColor="#58a6ff"
+        android:pathData="M62,63 m-3,0 a3,3 0,1 1,6 0 a3,3 0,1 1,-6 0" />
+
+    <!-- AI星芒点缀 -->
+    <path
+        android:fillColor="#79c0ff"
+        android:pathData="M33,37 L34,40 L37,41 L34,42 L33,45 L32,42 L29,41 L32,40 Z" />
+    <path
+        android:fillColor="#79c0ff"
+        android:fillAlpha="0.5"
+        android:pathData="M68,40 L69,42 L71,43 L69,44 L68,46 L67,44 L65,43 L67,42 Z" />
+
+    <!-- 顶部听筒 -->
+    <path
+        android:fillColor="#58a6ff"
+        android:fillAlpha="0.4"
+        android:pathData="M46,22 L62,22 C63.1,22 64,22.9 64,24 L64,24 C64,25.1 63.1,26 62,26 L46,26 C44.9,26 44,25.1 44,24 L44,24 C44,22.9 44.9,22 46,22 Z" />
+
+    <!-- 底部home指示条 -->
+    <path
+        android:fillColor="#58a6ff"
+        android:fillAlpha="0.3"
+        android:pathData="M44,82 L64,82 C65.1,82 66,82.9 66,84 L66,84 C66,85.1 65.1,86 64,86 L44,86 C42.9,86 42,85.1 42,84 L42,84 C42,82.9 42.9,82 44,82 Z" />
+</vector>

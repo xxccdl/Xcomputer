@@ -1,0 +1,69 @@
+node_modules/
+out/
+dist/
+dist-release/
+dist-release-v2/
+dist-release-v3/
+dist-release-v4/
+dist-release-v5/
+release/
+*.log
+.DS_Store
+.env
+.env.local
+.vite/
+
+# Python 虚拟环境（由 npm run setup:mcp 用项目内 python/uv 生成，不提交）
+.venv/
+
+# Python embeddable 缓存文件（python/ 目录本身需要提交，因为项目自带 Python+uv）
+python/*.zip
+python/__pycache__/
+
+# 构建产物
+*.exe
+*.7z
+*.zip
+*.blockmap
+*.dmg
+*.AppImage
+*.snap
+
+# IDE / 工具
+.gradle/
+.trae/
+.idea/
+.vscode/
+
+# 测试目录
+test-*/
+
+# SDK / 大依赖目录
+android-sdk/
+tools/
+
+# 本地大模型文件（按需下载，不提交）
+local-models/*.gguf
+local-models/*.bin
+resources/local-models/*.gguf
+resources/local-models/*.bin
+
+# 大型二进制下载文件（超过 GitHub 50MB 建议限制）
+website/public/download/*.apk
+website/public/download/*.exe
+website/public/download/*.7z
+website/public/download/*.zip
+
+# 视频渲染临时文件
+remotion-video/build/
+remotion-video/out/
+
+# 网站构建产物
+website/dist/
+
+# 构建缓存
+*.tsbuildinfo
+
+# 日志/调试文件
+*logcat*
+debug.log
