@@ -311,6 +311,9 @@ export const LOCAL_MODEL_LORA_SCALE = 1.0
 /** OpenX 内核加速：积分消耗倍率（3 倍） */
 export const OPENX_MULTIPLIER = 3
 
+/** OpenX 云端代理 Base URL（限免模式 + OpenX 加速时使用，云端自动压缩/还原，兼容 OpenAI SDK） */
+export const OPENX_PROXY_BASE_URL = 'https://backend.appmiaoda.com/projects/supabase334201161320022016/functions/v1/openx-proxy'
+
 /** OpenX 预设模板字典（807 个高频代码模板，按类别组织，{0}/{1} 为参数占位符） */
 // 完整字典定义在 openx-templates.ts，此处 re-export 供其他模块引用
 // 解码器注册全部模板；提示词仅注入 OPENX_CORE_TEMPLATES 核心子集以控制 token 开销

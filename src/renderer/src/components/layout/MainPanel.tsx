@@ -87,6 +87,7 @@ export function MainPanel(): JSX.Element {
   const relayMode = useSettingsStore((s) => s.settings.relayMode)
   const deepseekApiKey = useSettingsStore((s) => s.settings.deepseekApiKey)
   const openXEnabled = useSettingsStore((s) => s.settings.openXEnabled)
+  const openXToken = useSettingsStore((s) => s.settings.openXToken)
   const localModelEnabled = useSettingsStore((s) => s.settings.localModel?.enabled ?? false)
   // 本地模型开启后优先级最高：覆盖限免模式，隐藏 relay 相关徽标/横幅
   const isRelayActive = !localModelEnabled && (relayMode || !deepseekApiKey.trim())
@@ -355,10 +356,10 @@ export function MainPanel(): JSX.Element {
             </span>
           </div>
           {/* OpenX 内核加速指示器 */}
-          {isRelayActive && openXEnabled && (
+          {openXEnabled && (
             <div
               className="flex items-center gap-1 rounded-full border border-purple-500/40 bg-purple-500/10 px-2 py-1 text-xs shadow-sm backdrop-blur"
-              title="OpenX 内核加速已启用（3 倍积分消耗）"
+              title={openXToken ? 'OpenX 云端代理已启用（不扣积分）' : 'OpenX 本地解码已启用（限免模式，3 倍积分）'}
             >
               <Zap size={11} className="shrink-0 text-purple-500" />
               <span className="font-medium text-purple-500">OX</span>

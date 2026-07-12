@@ -1,24 +1,25 @@
-{
-  "desktop": {
-    "version": "0.2.54",
-    "updatedAt": "2026-07-11",
-    "sizeBytes": 499494682,
-    "filename": "Xcomputer-0.2.54-setup.exe",
-    "url": "/download/Xcomputer-0.2.54-setup.exe",
-    "size": "476.3 MB",
-    "releaseNotes": [
-      "修复安装包损坏导致主程序缺失问题：禁用 7z 的 BCJ2 压缩过滤器（NSIS Nsis7z 插件不支持 BCJ2，导致 EXE/DLL 解压失败）",
-      "禁用 7z solid 压缩模式，确保大量文件场景下安装解压的可靠性",
-      "精简安装包体积以符合腾讯云 500 MiB 限制：移除 ARM64 / CUDA-ext / Vulkan 变体，限制 Electron 语言为中英文",
-      "移除运行时不需要的 gitRelease.bundle，安装包从 629 MB 降至 476 MiB"
-    ]
-  },
-  "mobile": {
-    "version": "1.0.0",
-    "updatedAt": "2026-06-27",
-    "sizeBytes": 93041108,
-    "filename": "xphoneai-1.0.0.apk",
-    "url": "/download/xphoneai-1.0.0.apk",
-    "size": "88.7 MB"
-  }
+﻿{
+    "desktop":  {
+                    "version":  "0.2.55",
+                    "updatedAt":  "2026-07-12",
+                    "sizeBytes":  499398566,
+                    "filename":  "Xcomputer-0.2.55-setup.exe",
+                    "url":  "/download/Xcomputer-0.2.55-setup.exe",
+                    "size":  "476.3 MB",
+                    "releaseNotes":  [
+                                         "新增 OpenX 云端代理模式：填入 Token 后走云端代理自动压缩/还原，不扣积分，不限模式",
+                                         "OpenX 开关不再依赖限免模式，可随时开启",
+                                         "OpenX 代理模式支持深度思考和用户自选模型",
+                                         "修复 NSIS 安装包缺失主程序问题（BCJ2 压缩过滤器不兼容）",
+                                         "精简安装包体积至 500 MiB 以内"
+                                     ]
+                },
+    "mobile":  {
+                   "version":  "1.0.0",
+                   "updatedAt":  "2026-06-27",
+                   "sizeBytes":  93041108,
+                   "filename":  "xphoneai-1.0.0.apk",
+                   "url":  "/download/xphoneai-1.0.0.apk",
+                   "size":  "88.7 MB"
+               }
 }

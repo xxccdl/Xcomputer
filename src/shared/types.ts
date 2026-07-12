@@ -31,6 +31,8 @@ export interface Settings {
   relayModelPreference: 'flash' | 'pro'
   /** 是否启用 OpenX 内核加速（实验性，3 倍积分消耗，仅限免模式生效） */
   openXEnabled: boolean
+  /** OpenX 云端代理 API Token（从 OpenX 控制台获取，空则回退本地 OX 解码方案） */
+  openXToken: string
   /** 本地模型（实验性）：启用后在本地运行 AI 推理（qwen3-4b 基座 + litex LoRA），不依赖网络。
    *  采用进程内 node-llama-cpp 推理，无需外部服务端点。 */
   localModel: {
@@ -245,6 +247,7 @@ export const DEFAULT_SETTINGS: Settings = {
   relayMode: false,
   relayModelPreference: 'flash',
   openXEnabled: false,
+  openXToken: '',
   localModel: {
     enabled: false,
     loraScale: 1.0

@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto'
 import { settingsStore } from '../store/settings'
 import { logger } from '../utils/logger'
 import { INTENT_PROMPT, SYSTEM_PROMPT_CHAT, SYSTEM_PROMPT_LOCAL, SYSTEM_PROMPT_LOCAL_TASK, SYSTEM_PROMPT_TASK, SYSTEM_PROMPT_CODE, SYSTEM_PROMPT_PLAN, SYSTEM_PROMPT_SPEC, OPENX_COMPRESSION_PROMPT, OPENX_REMINDER_HEADER } from './prompts'
-import { DEEPSEEK_MAX_CONTEXT_TOKENS, KIMI_K27_MAX_CONTEXT_TOKENS, XSKILLHUB_RELAY_BASE_URL, XSKILLHUB_RELAY_API_KEY, RELAY_MAX_CONTEXT_TOKENS, RELAY_DAILY_LIMIT, RELAY_MODEL, SKILL_HUB_BASE_URL, PAID_PRO_MODEL, PAID_CREDITS, LOCAL_MODEL_NAME, LOCAL_MODEL_MAX_CONTEXT_TOKENS } from '@shared/constants'
+import { DEEPSEEK_MAX_CONTEXT_TOKENS, KIMI_K27_MAX_CONTEXT_TOKENS, XSKILLHUB_RELAY_BASE_URL, XSKILLHUB_RELAY_API_KEY, RELAY_MAX_CONTEXT_TOKENS, RELAY_DAILY_LIMIT, RELAY_MODEL, SKILL_HUB_BASE_URL, PAID_PRO_MODEL, PAID_CREDITS, LOCAL_MODEL_NAME, LOCAL_MODEL_MAX_CONTEXT_TOKENS, OPENX_PROXY_BASE_URL } from '@shared/constants'
 import { extractTextFromContent } from '@shared/types'
 import type { ConnectionTestResult, MessageContent, RelayQuota, GeneratedSubagentConfig } from '@shared/types'
 import type { FunctionSchema } from './function-schemas'
@@ -232,9 +232,16 @@ class AiService {
     return s.relayMode || !localKey
   }
 
-  /** OpenX 内核加速是否生效（仅限免模式 + 开关开启） */
+  /** OpenX 本地解码模式是否生效（仅限免模式 + 开关开启 + 无代理 Token）
+   *  走 xskillhub 中继，消耗 3 倍积分 */
   private get isOpenXActive(): boolean {
-    return this.isRelayMode() && settingsStore.get().openXEnabled
+    return this.isRelayMode() && settingsStore.get().openXEnabled && !this.isOpenXProxyActive
+  }
+
+  /** OpenX 云端代理是否生效（开关开启 + 已配置 Token，不限模式，不扣积分）。
+   *  代理模式下云端自动压缩/还原，客户端无需注入提示词或解码器。 */
+  private get isOpenXProxyActive(): boolean {
+    return settingsStore.get().openXEnabled && (settingsStore.get().openXToken ?? '').trim().length > 0
   }
 
   /** 本地模型是否激活（实验性功能，优先级最高：开启后覆盖 relay/direct 所有模式） */
@@ -248,6 +255,10 @@ class AiService {
     // 本地模型走进程内 node-llama-cpp，getClients 会直接返回 LocalModelClient，此处仅占位
     if (this.isLocalModelActive()) {
       return { apiKey: 'local-model', baseURL: 'local' }
+    }
+    // OpenX 云端代理：不限模式，已配置 Token 时优先走代理（不扣积分，自动压缩/还原）
+    if (this.isOpenXProxyActive) {
+      return { apiKey: s.openXToken.trim(), baseURL: OPENX_PROXY_BASE_URL }
     }
     if (this.isKimiK27Code(model)) {
       return {
@@ -280,30 +291,36 @@ class AiService {
 
     const s = settingsStore.get()
     const relay = this.isRelayMode()
-    // 限免模式：付费用户（偏好 pro 且余额≥4）可切换 PAID_PRO_MODEL，否则强制 flash
-    const usePro = relay && s.relayModelPreference === 'pro' && this.getPaidBalance() >= PAID_CREDITS.PRO_COST
-    const fastModelKey = relay ? RELAY_MODEL : s.fastModel
-    const proModelKey = relay ? (usePro ? PAID_PRO_MODEL : RELAY_MODEL) : s.proModel
+    const openXProxy = this.isOpenXProxyActive
+    // OpenX 代理模式：不扣积分，使用用户配置的模型；限免模式：付费用户可切 pro
+    const usePro = relay && !openXProxy && s.relayModelPreference === 'pro' && this.getPaidBalance() >= PAID_CREDITS.PRO_COST
+    const fastModelKey = (relay && !openXProxy) ? RELAY_MODEL : s.fastModel
+    const proModelKey = (relay && !openXProxy) ? (usePro ? PAID_PRO_MODEL : RELAY_MODEL) : s.proModel
     const fastConfig = this.getProviderConfig(fastModelKey)
     // 限免模式下，proClient 与 fastConfig 共用中继 baseURL
     const proConfig = relay ? fastConfig : this.getProviderConfig(proModelKey)
-    const key = `${fastConfig.apiKey}|${fastConfig.baseURL}|${proConfig.apiKey}|${proConfig.baseURL}|${proModelKey}|${usePro ? 'pro' : 'flash'}|${this.getPaidBalance()}|${s.openXEnabled ? 'openx' : 'no-openx'}`
+    const key = `${fastConfig.apiKey}|${fastConfig.baseURL}|${proConfig.apiKey}|${proConfig.baseURL}|${proModelKey}|${usePro ? 'pro' : 'flash'}|${this.getPaidBalance()}|${s.openXEnabled ? 'openx' : 'no-openx'}|${this.isOpenXProxyActive ? 'proxy' : 'local'}`
 
     if (key !== this.cachedSettingsKey || !this.fastClient || !this.proClient) {
-      // 限免模式：注入 X-Machine-Id header 供后端扣减付费积分，OpenX 时注入 X-OpenX
+      // 限免模式：注入 X-Machine-Id header 供后端扣减付费积分
+      // 本地 OX 解码模式时注入 X-OpenX（代理模式无需此 header，云端自动处理）
       // 排队重试时注入 X-Queue-Id（复用排队位置）和 X-Queue-Priority（已扣积分优先放行）
+      const openXProxyActive = this.isOpenXProxyActive
       const relayFetch = relay
         ? (url: RequestInfo | URL, init: RequestInit = {}): Promise<Response> => {
             const headers = new Headers(init.headers)
-            headers.set('X-Machine-Id', getMachineId())
-            if (s.openXEnabled) {
-              headers.set('X-OpenX', '1')
-            }
-            if (this.currentQueueId) {
-              headers.set('X-Queue-Id', this.currentQueueId)
-            }
-            if (this.currentQueuePriority) {
-              headers.set('X-Queue-Priority', '1')
+            // OpenX 代理模式不走 xskillhub 中继，不需要 X-Machine-Id / 排队 header
+            if (!openXProxyActive) {
+              headers.set('X-Machine-Id', getMachineId())
+              if (s.openXEnabled) {
+                headers.set('X-OpenX', '1')
+              }
+              if (this.currentQueueId) {
+                headers.set('X-Queue-Id', this.currentQueueId)
+              }
+              if (this.currentQueuePriority) {
+                headers.set('X-Queue-Priority', '1')
+              }
             }
             return fetch(url, { ...init, headers })
           }
@@ -338,6 +355,8 @@ class AiService {
   /** 限免模式下 proClient 实际使用的模型（付费用户可切 pro） */
   private get effectiveProModel(): string {
     if (this.isLocalModelActive()) return LOCAL_MODEL_NAME
+    // OpenX 代理模式：不扣积分，直接用用户配置的 pro 模型
+    if (this.isOpenXProxyActive) return settingsStore.get().proModel
     if (!this.isRelayMode()) return this.proModel
     const s = settingsStore.get()
     if (s.relayModelPreference === 'pro' && this.getPaidBalance() >= PAID_CREDITS.PRO_COST) {
@@ -349,12 +368,16 @@ class AiService {
   /** 快速模型：限免模式强制返回 flash，忽略用户设置；本地模型返回 LOCAL_MODEL_NAME */
   get fastModel(): string {
     if (this.isLocalModelActive()) return LOCAL_MODEL_NAME
+    // OpenX 代理模式：不扣积分，直接用用户配置的模型
+    if (this.isOpenXProxyActive) return settingsStore.get().fastModel
     return this.isRelayMode() ? RELAY_MODEL : settingsStore.get().fastModel
   }
 
   /** 专业模型：限免模式下付费用户可用 pro，否则强制 flash；本地模型返回 LOCAL_MODEL_NAME */
   get proModel(): string {
     if (this.isLocalModelActive()) return LOCAL_MODEL_NAME
+    // OpenX 代理模式：不扣积分，直接用用户配置的 pro 模型
+    if (this.isOpenXProxyActive) return settingsStore.get().proModel
     if (!this.isRelayMode()) return settingsStore.get().proModel
     const s = settingsStore.get()
     if (s.relayModelPreference === 'pro' && this.getPaidBalance() >= PAID_CREDITS.PRO_COST) {
@@ -366,6 +389,8 @@ class AiService {
   /** 深度思考：本地模型不支持思考；限免 flash 强制关闭；付费 pro 模型允许开启 */
   get deepThinkingEnabled(): boolean {
     if (this.isLocalModelActive()) return false
+    // OpenX 代理模式：不扣积分，按用户设置决定
+    if (this.isOpenXProxyActive) return settingsStore.get().deepThinking
     if (!this.isRelayMode()) return settingsStore.get().deepThinking
     // 限免模式：仅当使用付费 pro 模型时才允许思考
     return this.effectiveProModel === PAID_PRO_MODEL && settingsStore.get().deepThinking
@@ -470,7 +495,8 @@ class AiService {
 
     const memories = await memoryStore.retrieveForContext(userQuery)
     const skills = skillsStore.retrieveForContext(userQuery)
-    const openXActive = this.isOpenXActive
+    // OpenX 代理模式：云端自动压缩，无需注入提示词；仅本地 OX 方案时注入
+    const openXActive = this.isOpenXActive && !this.isOpenXProxyActive
     let prompt = openXActive ? OPENX_REMINDER_HEADER + '\n\n' + basePrompt : basePrompt
 
     if (memories.length > 0) {
@@ -532,8 +558,10 @@ class AiService {
     }
 
     // 限免模式：用 withQueueRetry 包装整个流式创建+迭代，自动处理排队重试
-    const useQueueRetry = this.isRelayMode()
-    const useOpenX = this.isOpenXActive
+    // OpenX 代理模式无排队机制，跳过 queueRetry
+    const useQueueRetry = this.isRelayMode() && !this.isOpenXProxyActive
+    // OpenX 代理模式：云端已还原，无需本地解码；仅本地 OX 方案时创建解码器
+    const useOpenX = this.isOpenXActive && !this.isOpenXProxyActive
     const decoder = useOpenX ? new OpenXDecoder() : null
 
     const runStream = async (): Promise<string> => {
@@ -653,7 +681,8 @@ class AiService {
     const proModel = this.effectiveProModel
     const isKimi = this.isKimiK27Code(proModel)
     const isRelay = this.isRelayMode()
-    const isPaidPro = isRelay && proModel === PAID_PRO_MODEL
+    const isOpenXProxy = this.isOpenXProxyActive
+    const isPaidPro = isRelay && !isOpenXProxy && proModel === PAID_PRO_MODEL
     const isLocal = this.isLocalModelActive()
 
     const createParams: Record<string, unknown> = {
@@ -682,7 +711,7 @@ class AiService {
         createParams.thinking = { type: 'disabled' }
         createParams.temperature = 0.2
       }
-    } else if (isRelay) {
+    } else if (isRelay && !isOpenXProxy) {
       // 限免 flash 模式：不支持 thinking 参数，仅传 temperature
       createParams.temperature = 0.3
     } else if (isKimi) {
@@ -698,7 +727,7 @@ class AiService {
       createParams.temperature = 0.2
     }
 
-    const useOpenX = this.isOpenXActive
+    const useOpenX = this.isOpenXActive && !this.isOpenXProxyActive
     const decoder = useOpenX ? new OpenXDecoder() : null
 
     // 流式创建+迭代提取为内部函数，支持排队重试
@@ -786,7 +815,9 @@ class AiService {
     }
 
     // 限免模式：用 withQueueRetry 包装，自动处理排队重试
-    const { content, reasoning, toolCallMap } = isRelay
+    // OpenX 代理模式无排队机制，直接执行
+    const useQueueRetryTools = isRelay && !this.isOpenXProxyActive
+    const { content, reasoning, toolCallMap } = useQueueRetryTools
       ? await this.withQueueRetry(async () => {
           if (decoder) decoder.reset()
           return runStream()

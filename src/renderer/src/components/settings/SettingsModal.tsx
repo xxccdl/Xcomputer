@@ -620,7 +620,7 @@ export function SettingsModal({ onClose }: SettingsModalProps): JSX.Element {
 
                 {/* OpenX 内核加速 */}
                 <Card>
-                  <div className={`flex items-start gap-2.5 ${isRelayActive ? '' : 'opacity-50'}`}>
+                  <div className="flex items-start gap-2.5">
                     <Zap size={16} className="mt-0.5 text-accent" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between">
@@ -629,20 +629,46 @@ export function SettingsModal({ onClose }: SettingsModalProps): JSX.Element {
                           <span className="ml-1.5 rounded bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-accent">实验性</span>
                         </span>
                         <ToggleSwitch
-                          checked={form.openXEnabled && isRelayActive}
-                          disabled={!isRelayActive}
-                          onChange={(v) => { if (isRelayActive) setForm({ ...form, openXEnabled: v }) }}
+                          checked={form.openXEnabled}
+                          onChange={(v) => setForm({ ...form, openXEnabled: v })}
                         />
                       </div>
                       <div className="mt-1 text-xs leading-relaxed text-text-muted">
-                        {isRelayActive
-                          ? 'AI 用压缩标记输出代码以加速响应，消耗 3 倍积分。内置 500+ 模板覆盖主流语言和工具调用。'
-                          : '仅限免模式可用'}
+                        AI 用压缩标记输出代码以加速响应。填入 Token 走云端代理（不扣积分，不限模式），留空则限免模式下用本地 OX 解码（3 倍积分）。
                       </div>
-                      {isRelayActive && form.openXEnabled && (
-                        <div className="mt-1.5 text-xs text-amber-500">
-                          ⚡ flash: 3 积分/次，pro: 12 积分/次
-                        </div>
+                      {form.openXEnabled && (
+                        <>
+                          {isRelayActive && !(form.openXToken ?? '').trim() && (
+                            <div className="mt-1.5 text-xs text-amber-500">
+                              ⚡ 本地 OX 模式：flash 3 积分/次，pro 12 积分/次
+                            </div>
+                          )}
+                          {(form.openXToken ?? '').trim() && (
+                            <div className="mt-1.5 text-xs text-green-500">
+                              ✅ 云端代理模式：不扣积分，不限模式
+                            </div>
+                          )}
+                          <div className="mt-2">
+                            <input
+                              type="password"
+                              className="input font-mono text-xs"
+                              value={form.openXToken ?? ''}
+                              placeholder="OpenX API Token（留空则限免模式用本地 OX 解码）"
+                              onChange={(e) => setForm({ ...form, openXToken: e.target.value })}
+                            />
+                            <div className="mt-1 text-[11px] text-text-muted">
+                              填入 Token 后走云端 OpenX 代理（自动压缩/还原，不扣积分）。
+                              <a
+                                href="https://app-cxqmurmax9fk.appmiaoda.com/docs"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-1 text-accent hover:underline"
+                              >
+                                查看文档 →
+                              </a>
+                            </div>
+                          </div>
+                        </>
                       )}
                     </div>
                   </div>
