@@ -93,6 +93,16 @@ app.whenReady().then(async () => {
   // 拦截主窗口关闭事件：最小化到托盘而非退出应用
   mainWindow.on('close', handleMainWindowClose)
 
+  // 窗口可见性节流：隐藏到托盘时降低后台轮询频率（USB/网络/调度），减少 CPU 占用
+  mainWindow.on('hide', () => {
+    triggerService.onWindowHidden()
+    scheduleService.onWindowHidden()
+  })
+  mainWindow.on('show', () => {
+    triggerService.onWindowVisible()
+    scheduleService.onWindowVisible()
+  })
+
   // 创建悬浮球窗口并绑定到状态服务
   floatingBallWindow = createFloatingBallWindow()
   floatingBallState.setWindow(floatingBallWindow)

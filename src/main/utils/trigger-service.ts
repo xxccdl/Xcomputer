@@ -27,6 +27,8 @@ const DEFAULT_RETRY_DELAY_MS = 60_000
 const DEBOUNCE_MS = 2000
 /** 系统（USB/网络）轮询间隔 */
 const SYSTEM_POLL_MS = 10_000
+/** 窗口隐藏时系统轮询间隔（降频 6 倍，减少后台 CPU 占用） */
+const SYSTEM_POLL_MS_BACKGROUND = 60_000
 
 class TriggerService {
   private fileWatchers = new Map<string, FSWatcher>() // triggerId -> watcher
@@ -42,6 +44,8 @@ class TriggerService {
   private retryTimers = new Map<string, NodeJS.Timeout>()
   /** 触发防抖定时器（合并短时间内的多次触发） */
   private debounceTimers = new Map<string, NodeJS.Timeout>()
+  /** 窗口是否隐藏（隐藏时降频 USB/网络轮询，减少后台 CPU 占用） */
+  private throttled = false
 
   setMainWindow(win: BrowserWindow): void {
     this.mainWindow = win
@@ -123,6 +127,41 @@ class TriggerService {
     this.timeoutTimers.clear()
     this.retryTimers.clear()
     this.runningIds.clear()
+  }
+
+  /** 窗口隐藏时降频 USB/网络轮询（只重建轮询定时器，不中断正在执行的触发器） */
+  onWindowHidden(): void {
+    if (this.throttled) return // 已处于节流状态
+    this.throttled = true
+    this.reloadPollers()
+    logger.info('[TriggerService] 窗口隐藏，USB/网络轮询降频到 60s')
+  }
+
+  /** 窗口可见时恢复正常轮询频率 */
+  onWindowVisible(): void {
+    if (!this.throttled) return // 已处于正常状态
+    this.throttled = false
+    this.reloadPollers()
+    logger.info('[TriggerService] 窗口可见，USB/网络轮询恢复到 10s')
+  }
+
+  /** 重建所有 USB/网络轮询型监听器（用当前 throttled 状态决定间隔） */
+  private reloadPollers(): void {
+    // 收集当前所有 usb/network 类型的触发器 ID
+    const triggers = triggerStore.list().filter(
+      (t) => t.enabled && (t.type === 'usb' || t.type === 'network')
+    )
+    for (const trigger of triggers) {
+      // 停止旧的轮询定时器（只清 intervalTimers，不碰 runningIds/timeout/retry）
+      const timer = this.intervalTimers.get(trigger.id)
+      if (timer) {
+        clearInterval(timer)
+        this.intervalTimers.delete(trigger.id)
+      }
+      // 用新间隔重建
+      if (trigger.type === 'usb') this.watchUsb(trigger)
+      else if (trigger.type === 'network') this.watchNetwork(trigger)
+    }
   }
 
   private watchFile(trigger: AutomationTrigger): void {
@@ -217,7 +256,7 @@ class TriggerService {
           lastDevices = current
         }
       )
-    }, SYSTEM_POLL_MS)
+    }, this.throttled ? SYSTEM_POLL_MS_BACKGROUND : SYSTEM_POLL_MS)
     this.intervalTimers.set(trigger.id, timer)
     logger.info(`[TriggerService] usb watcher started for ${trigger.name}`)
   }
@@ -255,7 +294,7 @@ class TriggerService {
         }
       }
       lastKey = key
-    }, SYSTEM_POLL_MS)
+    }, this.throttled ? SYSTEM_POLL_MS_BACKGROUND : SYSTEM_POLL_MS)
     this.intervalTimers.set(trigger.id, timer)
     logger.info(`[TriggerService] network watcher started for ${trigger.name}`)
   }

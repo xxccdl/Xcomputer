@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, memo } from 'react'
 import { clsx } from 'clsx'
 import {
   ChevronRight,
@@ -163,9 +163,12 @@ interface TaskStepListProps {
   messageId: string
 }
 
-export function TaskStepList({ steps }: TaskStepListProps): JSX.Element {
+function TaskStepListImpl({ steps }: TaskStepListProps): JSX.Element {
   // 操作步骤列表只显示工具调用/结果和深度思考，不显示普通 thinking 内容
-  const visibleSteps = steps.filter((s) => s.type !== 'thinking')
+  const visibleSteps = useMemo(
+    () => steps.filter((s) => s.type !== 'thinking'),
+    [steps]
+  )
   if (visibleSteps.length === 0) return <></>
   return (
     <div className="mb-4 ml-10 space-y-1.5">
@@ -179,3 +182,6 @@ export function TaskStepList({ steps }: TaskStepListProps): JSX.Element {
     </div>
   )
 }
+
+/** React.memo：steps 引用不变时跳过重渲染（配合 stepsByMessageId Map 查表） */
+export const TaskStepList = memo(TaskStepListImpl)

@@ -1,17 +1,19 @@
 ﻿{
     "desktop":  {
-                    "version":  "0.2.55",
+                    "version":  "0.2.56",
                     "updatedAt":  "2026-07-12",
-                    "sizeBytes":  499398566,
-                    "filename":  "Xcomputer-0.2.55-setup.exe",
-                    "url":  "/download/Xcomputer-0.2.55-setup.exe",
+                    "sizeBytes":  499437169,
+                    "filename":  "Xcomputer-0.2.56-setup.exe",
+                    "url":  "/download/Xcomputer-0.2.56-setup.exe",
                     "size":  "476.3 MB",
                     "releaseNotes":  [
-                                         "新增 OpenX 云端代理模式：填入 Token 后走云端代理自动压缩/还原，不扣积分，不限模式",
-                                         "OpenX 开关不再依赖限免模式，可随时开启",
-                                         "OpenX 代理模式支持深度思考和用户自选模型",
-                                         "修复 NSIS 安装包缺失主程序问题（BCJ2 压缩过滤器不兼容）",
-                                         "精简安装包体积至 500 MiB 以内"
+                                         "流式渲染性能优化：streamingMessage 分离 + React.memo 冻结历史消息，token 更新从 O(n) 降至 O(1)",
+                                         "Markdown 解析节流到 12fps（80ms），流式时 CPU 削减 80%+",
+                                         "stepsByMessageId Map 查表消除 O(n×m) filter，改为 O(1)",
+                                         "阈值门控虚拟化：超过 80 条消息自动启用虚拟滚动，长会话 DOM 减少 90%",
+                                         "后台定时器随窗口可见性节流：USB/网络轮询 10s→60s，调度检查 30s→120s",
+                                         "Electron webPreferences 优化：backgroundThrottling + 禁用拼写检查",
+                                         "移除 sticky banner backdrop-blur 减少滚动时 GPU 合成层重绘"
                                      ]
                 },
     "mobile":  {

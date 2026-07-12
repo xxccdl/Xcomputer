@@ -10,6 +10,8 @@ import type { ScheduledTask, ScheduleRunLog, ScheduleStatus } from '@shared/type
 
 /** 调度器检查间隔（每 30 秒检查一次到期任务） */
 const CHECK_INTERVAL_MS = 30_000
+/** 窗口隐藏时调度器检查间隔（降频 4 倍，减少后台 CPU 占用） */
+const CHECK_INTERVAL_MS_BACKGROUND = 120_000
 /** 最大并发执行任务数 */
 const MAX_CONCURRENT = 3
 /** 默认任务超时（5 分钟） */
@@ -26,9 +28,38 @@ class ScheduleService {
   private timeoutTimers = new Map<string, NodeJS.Timeout>()
   /** 重试定时器 */
   private retryTimers = new Map<string, NodeJS.Timeout>()
+  /** 窗口是否隐藏（隐藏时降频检查，减少后台 CPU 占用） */
+  private throttled = false
 
   setMainWindow(win: BrowserWindow): void {
     this.mainWindow = win
+  }
+
+  /** 窗口隐藏时降频调度检查 */
+  onWindowHidden(): void {
+    if (this.throttled) return
+    this.throttled = true
+    this.restartTimer()
+    logger.info('[Scheduler] 窗口隐藏，检查间隔降频到 120s')
+  }
+
+  /** 窗口可见时恢复正常检查频率 */
+  onWindowVisible(): void {
+    if (!this.throttled) return
+    this.throttled = false
+    this.restartTimer()
+    logger.info('[Scheduler] 窗口可见，检查间隔恢复到 30s')
+  }
+
+  /** 重启调度定时器（用当前 throttled 状态决定间隔） */
+  private restartTimer(): void {
+    if (this.timer) {
+      clearInterval(this.timer)
+      this.timer = null
+    }
+    this.timer = setInterval(() => {
+      void this.tick()
+    }, this.throttled ? CHECK_INTERVAL_MS_BACKGROUND : CHECK_INTERVAL_MS)
   }
 
   start(): void {

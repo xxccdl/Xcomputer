@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo, memo } from 'react'
 import { clsx } from 'clsx'
 import { User, Sparkles, Copy, Check, AlertTriangle, Info } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
@@ -7,6 +7,7 @@ import rehypeRaw from 'rehype-raw'
 import type { Message } from '@shared/types'
 import { extractTextFromContent } from '@shared/types'
 import { replaceEmojiWithSvg } from '../../utils/emoji-icons'
+import { useThrottledValue } from '../../hooks/useThrottledValue'
 
 const markdownComponents = {
   p: ({ children }: { children?: React.ReactNode }): JSX.Element => (
@@ -91,16 +92,26 @@ function detectMessageType(text: string): { isError: boolean; isWarning: boolean
   return { isError: hasError, isWarning: hasWarning }
 }
 
-export function ChatMessage({ message }: { message: Message }): JSX.Element {
+function ChatMessageImpl({ message }: { message: Message }): JSX.Element {
   const isUser = message.role === 'user'
   const isSystem = message.role === 'system'
   const [copied, setCopied] = useState(false)
-  const rawText = extractTextFromContent(message.content)
+  const rawText = useMemo(() => extractTextFromContent(message.content), [message.content])
 
-  // 将 emoji 替换为手绘 SVG 图标（仅 AI/系统消息需要；用户消息用原生 emoji 渲染，
+  // 节流：流式时 Markdown 解析限制在 ~12fps（80ms），历史消息值稳定无影响
+  // 削减 80%+ 的 rehype/remark 解析开销
+  const throttledRaw = useThrottledValue(rawText, 80)
+
+  // 缓存 emoji 替换（仅 AI/系统消息需要；用户消息用原生 emoji 渲染，
   // 避免在 <p> 文本节点中显示原始 SVG HTML 字符串）
-  const textContent = isUser ? rawText : replaceEmojiWithSvg(rawText)
-  const { isError, isWarning } = isSystem ? detectMessageType(textContent) : { isError: false, isWarning: false }
+  const textContent = useMemo(
+    () => (isUser ? throttledRaw : replaceEmojiWithSvg(throttledRaw)),
+    [throttledRaw, isUser]
+  )
+  const { isError, isWarning } = useMemo(
+    () => (isSystem ? detectMessageType(textContent) : { isError: false, isWarning: false }),
+    [textContent, isSystem]
+  )
 
   const handleCopy = async (): Promise<void> => {
     try {
@@ -220,3 +231,17 @@ export function ChatMessage({ message }: { message: Message }): JSX.Element {
     </div>
   )
 }
+
+/**
+ * React.memo 包裹：冻结历史消息组件，流式时只重渲染最后一条 streamingMessage。
+ * 自定义比较函数：仅在 id/role/content/stepIds 变化时重渲染，
+ * 避免父组件 MainPanel 因 streamingMessage/steps 变化导致的全量重渲染。
+ */
+export const ChatMessage = memo(
+  ChatMessageImpl,
+  (prev, next) =>
+    prev.message.id === next.message.id &&
+    prev.message.role === next.message.role &&
+    prev.message.content === next.message.content &&
+    prev.message.stepIds === next.message.stepIds
+)

@@ -125,6 +125,8 @@ export function useSession(): {
 
         setMessages(messages)
         useChatStore.setState({ steps, todoItems: todos, subagents, isLoadingSession: false })
+        // 批量加载 steps 后重建 stepsByMessageId 索引（绕过了 upsertStep 的增量维护）
+        useChatStore.getState().rebuildIndexes()
 
         // 加载完会话后主动拉取上下文使用率，填充右侧详情面板
         // 注意：getContextUsage 返回 Promise（非 IPC 推送），必须用返回值更新 store
@@ -142,7 +144,7 @@ export function useSession(): {
         // 即使失败也设置空数组，避免卡在空白状态
         if (requestId === selectRequestIdRef.current) {
           setMessages([])
-          useChatStore.setState({ steps: [], todoItems: [], subagents: [], isLoadingSession: false, contextUsage: null })
+          useChatStore.setState({ steps: [], stepsByMessageId: new Map(), todoItems: [], subagents: [], isLoadingSession: false, contextUsage: null })
         }
       }
     },

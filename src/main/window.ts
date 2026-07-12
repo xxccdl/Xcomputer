@@ -49,7 +49,9 @@ export function createMainWindow(): BrowserWindow {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: true,
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      backgroundThrottling: true, // 后台时降低定时器/动画频率，减少 CPU 占用
+      spellcheck: false // 禁用拼写检查（聊天应用不需要，省 CPU）
     }
   })
 

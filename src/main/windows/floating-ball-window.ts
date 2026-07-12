@@ -44,7 +44,9 @@ export function createFloatingBallWindow(): BrowserWindow {
       sandbox: true,
       contextIsolation: true,
       nodeIntegration: false,
-      offscreen: false
+      offscreen: false,
+      backgroundThrottling: true, // 后台时降低定时器/动画频率
+      spellcheck: false // 禁用拼写检查
     }
   })
 

@@ -92,6 +92,8 @@ export function useChatEvents(): void {
         ])
         setMessages(messages)
         useChatStore.setState({ steps, todoItems: todos, subagents })
+        // 批量重载 steps 后重建 stepsByMessageId 索引
+        useChatStore.getState().rebuildIndexes()
       } catch (err) {
         console.error('[useChat] 压缩后重载消息失败:', err)
       }

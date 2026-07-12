@@ -19,6 +19,7 @@ import {
   ClipboardList,
   FileText
 } from 'lucide-react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { useChatStore } from '../../store/chat.store'
 import { useSessionStore } from '../../store/session.store'
 import { useSettingsStore } from '../../store/settings.store'
@@ -70,10 +71,15 @@ const EXAMPLE_PROMPTS = [
   '整理桌面文件到对应文件夹'
 ]
 
+/** 虚拟化启用阈值：超过此条数时启用虚拟滚动，避免长会话 DOM 爆炸 */
+const VIRTUALIZATION_THRESHOLD = 80
+
 export function MainPanel(): JSX.Element {
   useChatEvents()
   const { currentSessionId, createSession, selectSession } = useSession()
   const messages = useChatStore((s) => s.messages)
+  const streamingMessage = useChatStore((s) => s.streamingMessage)
+  const stepsByMessageId = useChatStore((s) => s.stepsByMessageId)
   const steps = useChatStore((s) => s.steps)
   const isStreaming = useChatStore((s) => s.isStreaming)
   const send = useSend()
@@ -199,7 +205,7 @@ export function MainPanel(): JSX.Element {
     if (!userScrolledUpRef.current) {
       el.scrollTo({ top: el.scrollHeight, behavior: isStreaming ? 'auto' : 'smooth' })
     }
-  }, [messages, steps, isStreaming])
+  }, [messages, streamingMessage, steps, isStreaming])
 
   // 性能优化：用 Set 缓存已关联到消息的 stepId，避免嵌套循环 O(n×m)
   const associatedStepIds = useMemo(() => {
@@ -215,6 +221,23 @@ export function MainPanel(): JSX.Element {
     () => steps.filter((s) => !associatedStepIds.has(s.id)),
     [steps, associatedStepIds]
   )
+
+  // 渲染列表：流式时附加 streamingMessage（O(1) 更新，不碰 messages 数组）
+  const renderMessages = useMemo(
+    () => (streamingMessage ? [...messages, streamingMessage] : messages),
+    [messages, streamingMessage]
+  )
+
+  // 阈值门控虚拟化：>80 条消息时启用虚拟滚动，避免长会话 DOM 爆炸
+  const shouldVirtualize = renderMessages.length > VIRTUALIZATION_THRESHOLD
+  const rowVirtualizer = useVirtualizer({
+    count: renderMessages.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 200,
+    overscan: 5,
+    enabled: shouldVirtualize,
+    getItemKey: (index) => renderMessages[index].id
+  })
 
   const handleStop = async (): Promise<void> => {
     if (currentSessionId) await window.api.chat.stop(currentSessionId)
@@ -371,7 +394,7 @@ export function MainPanel(): JSX.Element {
       <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto">
         {/* Plan/Spec 模式横幅 */}
         {(currentMode === 'plan' || currentMode === 'spec') && currentSessionId && (
-          <div className="sticky top-0 z-10 border-b border-purple-500/30 bg-purple-500/10 backdrop-blur-md animate-slide-down">
+          <div className="sticky top-0 z-10 border-b border-purple-500/30 bg-purple-500/10 animate-slide-down">
             <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-2.5">
               {currentMode === 'plan' ? (
                 <ClipboardList size={16} className="shrink-0 text-purple-400" />
@@ -397,7 +420,7 @@ export function MainPanel(): JSX.Element {
             localModelStatus.state === 'loading' ||
             localModelStatus.state === 'error' ||
             localModelStatus.state === 'not-downloaded') && (
-          <div className="sticky top-0 z-10 border-b border-amber-500/30 bg-amber-500/10 backdrop-blur-md animate-slide-down">
+          <div className="sticky top-0 z-10 border-b border-amber-500/30 bg-amber-500/10 animate-slide-down">
             <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-2.5">
               {localModelStatus.state === 'error' ? (
                 <AlertTriangle size={16} className="shrink-0 text-amber-400" />
@@ -434,7 +457,7 @@ export function MainPanel(): JSX.Element {
         )}
         {/* 排队提示横幅（限免模式高并发时） */}
         {queueInfo && (
-          <div className="sticky top-0 z-10 border-b border-blue-500/30 bg-blue-500/10 backdrop-blur-md animate-slide-down">
+          <div className="sticky top-0 z-10 border-b border-blue-500/30 bg-blue-500/10 animate-slide-down">
             <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-2.5">
               <Loader2 size={16} className="shrink-0 animate-spin text-blue-400" />
               <div className="flex-1 text-xs leading-relaxed text-blue-200">
@@ -466,7 +489,7 @@ export function MainPanel(): JSX.Element {
         )}
         {/* 积分耗尽横幅（限免模式且剩余次数为 0 时显示） */}
         {quotaExhausted && currentSessionId && (
-          <div className="sticky top-0 z-10 border-b border-amber-500/30 bg-amber-500/10 backdrop-blur-md animate-slide-down">
+          <div className="sticky top-0 z-10 border-b border-amber-500/30 bg-amber-500/10 animate-slide-down">
             <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-2.5">
               <AlertTriangle size={16} className="shrink-0 text-amber-400" />
               <div className="flex-1 text-xs leading-relaxed text-amber-200">
@@ -562,7 +585,7 @@ export function MainPanel(): JSX.Element {
           </div>
         ) : (
           <div className="mx-auto max-w-3xl px-4 py-6">
-            {messages.length === 0 && !isStreaming && (
+            {messages.length === 0 && !isStreaming && !streamingMessage && (
               <div className="flex min-h-[60vh] animate-blur-in flex-col items-center justify-center py-8 text-center">
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-accent/10 animate-glow-pulse animate-float">
                   <Sparkles size={22} />
@@ -593,23 +616,59 @@ export function MainPanel(): JSX.Element {
               </div>
             )}
 
-            {messages.map((m) => (
-              <div key={m.id}>
-                {/* assistant 消息：先展示操作步骤，再展示结果文本 */}
-                {m.role === 'assistant' && m.stepIds && m.stepIds.length > 0 && (
-                  <TaskStepList
-                    steps={steps.filter((s) => m.stepIds?.includes(s.id))}
-                    messageId={m.id}
-                  />
-                )}
-                <ChatMessage message={m} />
+            {shouldVirtualize ? (
+              <div
+                style={{
+                  height: `${rowVirtualizer.getTotalSize()}px`,
+                  position: 'relative',
+                  width: '100%'
+                }}
+              >
+                {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                  const m = renderMessages[virtualRow.index]
+                  return (
+                    <div
+                      key={m.id}
+                      data-index={virtualRow.index}
+                      ref={rowVirtualizer.measureElement}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        transform: `translateY(${virtualRow.start}px)`
+                      }}
+                    >
+                      {m.role === 'assistant' && m.stepIds && m.stepIds.length > 0 && (
+                        <TaskStepList
+                          steps={stepsByMessageId.get(m.id) ?? []}
+                          messageId={m.id}
+                        />
+                      )}
+                      <ChatMessage message={m} />
+                    </div>
+                  )
+                })}
               </div>
-            ))}
+            ) : (
+              renderMessages.map((m) => (
+                <div key={m.id}>
+                  {/* assistant 消息：先展示操作步骤，再展示结果文本 */}
+                  {m.role === 'assistant' && m.stepIds && m.stepIds.length > 0 && (
+                    <TaskStepList
+                      steps={stepsByMessageId.get(m.id) ?? []}
+                      messageId={m.id}
+                    />
+                  )}
+                  <ChatMessage message={m} />
+                </div>
+              ))
+            )}
             {/* 流式过程中：显示尚未关联到任何消息的步骤 */}
             {isStreaming && orphanSteps.length > 0 && (
               <TaskStepList steps={orphanSteps} messageId="streaming" />
             )}
-            {isStreaming && steps.length === 0 && (
+            {isStreaming && steps.length === 0 && !streamingMessage && (
               <div className="flex animate-fade-in items-center gap-2 py-2 text-sm text-text-muted">
                 <span className="flex gap-1">
                   <span className="h-2 w-2 animate-bounce rounded-full bg-accent [animation-delay:0ms]" />
