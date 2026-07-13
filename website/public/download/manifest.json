@@ -2,14 +2,15 @@
     "desktop":  {
                     "version":  "0.2.66",
                     "updatedAt":  "2026-07-13",
-                    "sizeBytes":  499474863,
+                    "sizeBytes":  499460410,
                     "filename":  "Xcomputer-0.2.66-setup.exe",
                     "url":  "/download/Xcomputer-0.2.66-setup.exe",
                     "size":  "476.3 MB",
                     "releaseNotes":  [
+                                         "修复：AI 操控电脑时小组件优雅缩小到右下角而非直接关闭",
                                          "修复：小组件 AskUser 提问在组件页面显示不出来的问题",
                                          "新增 AskUser 提问 banner：支持开放式文本输入和选项选择",
-                                         "提问 banner 支持 Enter 提交、跳过按钮、自动展开 mini 模式"
+                                         "修复：agent 启动失败时状态卡死、confirm/ask 请求窗口不可见等问题"
                                      ]
                 },
     "mobile":  {
