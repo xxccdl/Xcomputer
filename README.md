@@ -103,8 +103,8 @@ npm run dist
 
 ## 📥 下载安装
 
-访问官网 [xxccdl.cn](https://xxccdl.cn) 下载最新版安装包，或直接从 [GitHub Releases](https://github.com/xxccdl/Xcomputer/releases) 下载。
-> **注意**：https://xxccdl.cn可能有时下载过慢，使用http://xxccdl.cn或GitHub Releases代替
+访问官网  [xxccdl.cn](https://xxccdl.cn)  下载最新版安装包，（或直接从 [GitHub Releases](https://github.com/xxccdl/Xcomputer/releases)  ）下载。
+> **注意**:`https://xxccdl.cn`可能有时下载过慢或版本号**过久**，使用`http://xxccdl.cn`或`GitHub Releases`或`gitee.com/xxccdl/Xcomputer`仓库代替
 
 ## 🔧 MCP 工具配置
 
