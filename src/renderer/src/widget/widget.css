@@ -544,6 +544,157 @@ html, body, #root {
   border-color: rgba(239, 68, 68, 0.4);
 }
 
+/* === 会话列表 === */
+.session-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.session-list::-webkit-scrollbar { width: 3px; }
+.session-list::-webkit-scrollbar-track { background: transparent; }
+.session-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+
+.session-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.session-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+.session-item.current {
+  border-color: rgba(99, 102, 241, 0.3);
+  background: rgba(99, 102, 241, 0.06);
+}
+.session-item.running {
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.session-info { flex: 1; min-width: 0; }
+.session-title-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 2px;
+}
+.session-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.82);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+.session-running-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #86efac;
+  flex-shrink: 0;
+  animation: session-pulse 1.5s ease-in-out infinite;
+  box-shadow: 0 0 6px rgba(134, 239, 172, 0.6);
+}
+.session-current-badge {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+  flex-shrink: 0;
+}
+.session-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+}
+.session-status { color: rgba(255, 255, 255, 0.25); }
+
+.session-delete-btn {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.session-item:hover .session-delete-btn { opacity: 1; }
+.session-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+.session-enter-icon {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+.session-item:hover .session-enter-icon { color: rgba(255, 255, 255, 0.35); }
+
+.session-confirm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+}
+.session-confirm button {
+  padding: 3px 8px;
+  border: none;
+  border-radius: 5px;
+  font-size: 10.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.session-confirm .confirm-del {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+.session-confirm .confirm-del:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+.session-confirm .confirm-cancel {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.6);
+}
+.session-confirm .confirm-cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.task-count-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@keyframes session-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
 /* 流式光标 */
 .streaming-cursor {
   display: inline-block;

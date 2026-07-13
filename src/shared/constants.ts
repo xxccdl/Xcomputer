@@ -268,6 +268,9 @@ export const IPC_CHANNELS = {
   WIDGET_ASK_REQUEST: 'widget:askRequest', // AI 提问请求（source=widget）
   WIDGET_ASK_RESPONSE: 'widget:askResponse', // AI 提问响应（widget → 主进程）
   WIDGET_AGENT_REFRESH: 'widget:agentRefresh', // 窗口重新显示时触发状态刷新
+  WIDGET_LIST_SESSIONS: 'widget:listSessions', // 查询所有会话 + 运行状态
+  WIDGET_DELETE_SESSION: 'widget:deleteSession', // 删除指定会话
+  WIDGET_LOAD_SESSION: 'widget:loadSession', // 加载已有会话到 widget agent
 
   // 确认/提问已解决广播（主进程 → 所有窗口，用于自动关闭对话框）
   CHAT_CONFIRM_RESOLVED: 'chat:confirmResolved',

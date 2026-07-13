@@ -53,6 +53,15 @@ const TABS: Array<{ key: Tab; label: string; icon: JSX.Element }> = [
 export function WidgetApp(): JSX.Element {
   const [tab, setTab] = useState<Tab>('chat')
 
+  const handleEnterSession = async (sessionId: string): Promise<void> => {
+    try {
+      await window.widgetApi.loadSession(sessionId)
+    } catch (err) {
+      console.error('[WidgetApp] 加载会话失败:', err)
+    }
+    setTab('agent')
+  }
+
   return (
     <div className="glass-container">
       <div className="widget-header">
@@ -80,7 +89,7 @@ export function WidgetApp(): JSX.Element {
 
       {tab === 'chat' && <WidgetChat />}
       {tab === 'agent' && <WidgetAgent />}
-      {tab === 'task' && <TaskProgress />}
+      {tab === 'task' && <TaskProgress onEnterSession={handleEnterSession} />}
       {tab === 'credits' && <WidgetCredits />}
       {tab === 'settings' && <WidgetSettings />}
     </div>

@@ -8,7 +8,7 @@ import { getOrchestrator, addRemoteListener, removeRemoteListener } from '../orc
 import { getWidgetWindow } from '../windows/widget-window'
 import { focusBrowserWindow } from '../utils/window-focus'
 import { logger } from '../utils/logger'
-import type { StepEvent, Settings, RelayQuota, PaidQuota, ConfirmRequest, AskRequest, Message, TaskStep } from '@shared/types'
+import type { StepEvent, Settings, RelayQuota, PaidQuota, ConfirmRequest, AskRequest, Message, TaskStep, Session } from '@shared/types'
 
 /** 简单对话消息（内存中维护，widget 生命周期内有效） */
 interface SimpleMessage {
@@ -388,6 +388,61 @@ export function registerWidgetIpc(mainWindow: BrowserWindow): void {
       logger.error('[Widget] agentGetState 失败:', err)
       return { sessionId: widgetAgentSessionId, messages: [], currentStatus: null, isRunning: widgetAgentRunning }
     }
+  })
+
+  // --- 会话列表管理 ---
+
+  // 查询所有会话 + 运行状态
+  ipcMain.handle(IPC_CHANNELS.WIDGET_LIST_SESSIONS, async (): Promise<{
+    sessions: Session[]
+    widgetAgentSessionId: string | null
+    runningSessionIds: string[]
+  }> => {
+    const sessions = sessionsStore.list()
+    const runningSessionIds = getOrchestrator()?.getRunningSessionIds() ?? []
+    return { sessions, widgetAgentSessionId, runningSessionIds }
+  })
+
+  // 删除指定会话
+  ipcMain.handle(IPC_CHANNELS.WIDGET_DELETE_SESSION, async (_e, sessionId: string): Promise<void> => {
+    // 如删除的是当前 widget agent 会话，先中断并清空
+    if (widgetAgentSessionId === sessionId) {
+      if (widgetAgentRunning) {
+        getOrchestrator()?.abort(sessionId)
+      }
+      widgetAgentSessionId = null
+      widgetAgentRunning = false
+    }
+    // 如删除的是主窗口活跃任务会话，也中断
+    if (activeTaskSessionId === sessionId) {
+      getOrchestrator()?.abort(sessionId)
+      activeTaskSessionId = null
+      taskRunning = false
+    }
+    sessionsStore.delete(sessionId)
+    // 清理该会话相关的本地工具状态和子代理（与 session.ipc.ts SESSION_DELETE 一致）
+    const { cleanupSessionLocalState } = await import('../tools/local-tools')
+    const { subagentManager } = await import('../orchestrator/subagent-manager')
+    cleanupSessionLocalState(sessionId)
+    subagentManager.cleanupSession(sessionId)
+    logger.info(`[Widget] 已删除会话: ${sessionId}`)
+  })
+
+  // 加载已有会话到 widget agent（切换当前 agent 会话）
+  ipcMain.handle(IPC_CHANNELS.WIDGET_LOAD_SESSION, async (_e, sessionId: string): Promise<string> => {
+    const meta = sessionsStore.getMeta(sessionId)
+    if (!meta) throw new Error('会话不存在')
+    // 切换到不同会话时，如当前 widget agent 任务正在运行，先中断
+    if (widgetAgentSessionId && widgetAgentSessionId !== sessionId && widgetAgentRunning) {
+      getOrchestrator()?.abort(widgetAgentSessionId)
+    }
+    widgetAgentSessionId = sessionId
+    const runningIds = getOrchestrator()?.getRunningSessionIds() ?? []
+    widgetAgentRunning = runningIds.includes(sessionId)
+    // 通知 renderer 刷新 agent 状态（若 WidgetAgent 已挂载则触发 loadAgentState）
+    sendToWidget(IPC_CHANNELS.WIDGET_AGENT_REFRESH)
+    logger.info(`[Widget] 加载会话到 agent: ${sessionId}`)
+    return sessionId
   })
 
   // Widget 高危确认响应

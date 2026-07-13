@@ -122,6 +122,21 @@ interface AgentState {
   isRunning: boolean
 }
 
+/** 会话元信息 */
+interface WidgetSessionInfo {
+  id: string
+  title: string
+  createdAt: number
+  updatedAt: number
+}
+
+/** 会话列表查询结果 */
+interface WidgetSessionListResult {
+  sessions: WidgetSessionInfo[]
+  widgetAgentSessionId: string | null
+  runningSessionIds: string[]
+}
+
 interface WidgetAPI {
   /** 发送对话消息（简单模式，无 agent） */
   chatSend(text: string): Promise<void>
@@ -169,6 +184,12 @@ interface WidgetAPI {
   agentNewSession(): Promise<string>
   /** 拉取 agent 状态（窗口重开时恢复） */
   agentGetState(): Promise<AgentState>
+  /** 查询所有会话列表 + 运行状态 */
+  listSessions(): Promise<WidgetSessionListResult>
+  /** 删除指定会话 */
+  deleteSession(sessionId: string): Promise<void>
+  /** 加载已有会话到 widget agent */
+  loadSession(sessionId: string): Promise<string>
   /** 响应高危确认 */
   respondConfirm(requestId: string, allowed: boolean): Promise<void>
   /** 响应 AI 提问 */

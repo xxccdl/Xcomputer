@@ -161,6 +161,15 @@ export class TaskOrchestrator {
     }
   }
 
+  /** 查询所有正在运行的会话 ID（未 abort 的任务） */
+  getRunningSessionIds(): string[] {
+    const ids: string[] = []
+    for (const [id, task] of runningTasks) {
+      if (!task.aborted) ids.push(id)
+    }
+    return ids
+  }
+
   /** 用户确认响应 */
   resolveConfirm(requestId: string, allowed: boolean): void {
     const entry = pendingConfirms.get(requestId)

@@ -1,45 +1,27 @@
 import { useState, useEffect, useCallback } from 'react'
 
-interface TaskStep {
+interface WidgetSessionInfo {
   id: string
-  sessionId: string
-  type: string
-  status: string
-  content: string
-  toolName?: string
-  toolArgs?: unknown
-  toolResult?: unknown
-  startedAt?: number
-  finishedAt?: number
-  error?: string
+  title: string
+  createdAt: number
+  updatedAt: number
 }
 
-interface TaskState {
-  sessionId: string | null
-  steps: TaskStep[]
-  isRunning: boolean
+interface SessionListState {
+  sessions: WidgetSessionInfo[]
+  widgetAgentSessionId: string | null
+  runningSessionIds: string[]
+}
+
+interface TaskProgressProps {
+  onEnterSession: (sessionId: string) => void
 }
 
 const ICONS = {
-  check: (
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 13l4 4L19 7" />
-    </svg>
-  ),
-  spinner: (
-    <svg className="spin" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 12a9 9 0 11-6.219-8.56" />
-    </svg>
-  ),
-  dot: (
-    <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-      <circle cx="12" cy="12" r="6" />
-    </svg>
-  ),
-  alert: (
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 9v4M12 17h.01" />
-      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+  trash: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
     </svg>
   ),
   empty: (
@@ -47,136 +29,140 @@ const ICONS = {
       <rect x="3" y="3" width="18" height="18" rx="2" />
       <path d="M9 9h6v6H9z" />
     </svg>
+  ),
+  enter: (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
   )
 }
 
-export function TaskProgress(): JSX.Element {
-  const [taskState, setTaskState] = useState<TaskState>({
-    sessionId: null,
-    steps: [],
-    isRunning: false
-  })
+function formatTime(ts: number): string {
+  const now = new Date()
+  const date = new Date(ts)
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  if (date.getTime() >= today) {
+    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  }
+  const yesterday = today - 86400000
+  if (date.getTime() >= yesterday) return '昨天'
+  return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
+}
 
-  const refreshState = useCallback(async () => {
+export function TaskProgress({ onEnterSession }: TaskProgressProps): JSX.Element {
+  const [state, setState] = useState<SessionListState>({
+    sessions: [],
+    widgetAgentSessionId: null,
+    runningSessionIds: []
+  })
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
+
+  const refresh = useCallback(async () => {
     try {
-      const state = await window.widgetApi.getTaskState()
-      setTaskState(state)
+      const result = await window.widgetApi.listSessions()
+      setState(result)
     } catch (err) {
-      console.error('[TaskProgress] 获取任务状态失败:', err)
+      console.error('[TaskProgress] 获取会话列表失败:', err)
     }
   }, [])
 
   useEffect(() => {
-    void refreshState()
+    void refresh()
 
-    const unsubStep = window.widgetApi.onTaskStep(() => {
-      void refreshState()
-    })
-    const unsubDone = window.widgetApi.onTaskDone(() => {
-      void refreshState()
-    })
-    const unsubError = window.widgetApi.onTaskError(() => {
-      void refreshState()
-    })
+    const unsubTaskStep = window.widgetApi.onTaskStep(() => void refresh())
+    const unsubTaskDone = window.widgetApi.onTaskDone(() => void refresh())
+    const unsubTaskError = window.widgetApi.onTaskError(() => void refresh())
+    const unsubAgentStep = window.widgetApi.onAgentStep(() => void refresh())
+    const unsubAgentDone = window.widgetApi.onAgentDone(() => void refresh())
+    const unsubAgentError = window.widgetApi.onAgentError(() => void refresh())
 
-    const interval = setInterval(() => {
-      void refreshState()
-    }, 2000)
+    const interval = setInterval(() => void refresh(), 3000)
 
     return () => {
-      unsubStep()
-      unsubDone()
-      unsubError()
+      unsubTaskStep()
+      unsubTaskDone()
+      unsubTaskError()
+      unsubAgentStep()
+      unsubAgentDone()
+      unsubAgentError()
       clearInterval(interval)
     }
-  }, [refreshState])
+  }, [refresh])
 
-  const handleStopTask = async () => {
+  const handleDelete = async (sessionId: string): Promise<void> => {
     try {
-      await window.widgetApi.stopTask()
+      await window.widgetApi.deleteSession(sessionId)
     } catch (err) {
-      console.error('[TaskProgress] 停止任务失败:', err)
+      console.error('[TaskProgress] 删除会话失败:', err)
     }
+    setConfirmingId(null)
+    void refresh()
   }
 
-  const { steps, isRunning, sessionId } = taskState
-
-  const getStepName = (step: TaskStep): string => {
-    if (step.toolName) return step.toolName
-    const typeMap: Record<string, string> = {
-      thinking: '思考',
-      tool_call: '调用工具',
-      tool_result: '工具结果',
-      final: '最终回复',
-      error: '错误',
-      message: '消息'
-    }
-    return typeMap[step.type] || step.type
-  }
-
-  const getStepIcon = (step: TaskStep): JSX.Element => {
-    if (step.status === 'done' || step.status === 'completed') return ICONS.check
-    if (step.status === 'running') return ICONS.spinner
-    if (step.status === 'error') return ICONS.alert
-    return ICONS.dot
-  }
-
-  const getStepIconClass = (step: TaskStep): string => {
-    if (step.status === 'done' || step.status === 'completed') return 'done'
-    if (step.status === 'running') return 'running'
-    if (step.status === 'error') return 'error'
-    return 'pending'
-  }
-
-  const getStepDetail = (step: TaskStep): string => {
-    if (step.error) return step.error.slice(0, 80)
-    if (step.content) return step.content.slice(0, 80)
-    if (step.toolArgs && typeof step.toolArgs === 'string') {
-      return step.toolArgs.slice(0, 80)
-    }
-    return ''
-  }
+  const { sessions, widgetAgentSessionId, runningSessionIds } = state
 
   return (
     <div className="task-area">
       <div className="task-header">
-        <span className="task-title">
-          {sessionId ? '当前任务' : '无运行中任务'}
-        </span>
-        <span className={`task-status-badge ${isRunning ? 'running' : steps.length > 0 ? 'done' : 'idle'}`}>
-          {isRunning ? '运行中' : steps.length > 0 ? '已完成' : '空闲'}
-        </span>
+        <span className="task-title">会话列表</span>
+        <span className="task-count-badge">{sessions.length}</span>
       </div>
 
-      {steps.length === 0 ? (
+      {sessions.length === 0 ? (
         <div className="empty-state">
           <div className="icon">{ICONS.empty}</div>
-          <div className="title">暂无任务进度</div>
-          <div className="hint">在主窗口中发送任务指令后，可在此查看实时进度</div>
+          <div className="title">暂无会话</div>
+          <div className="hint">在「智能」标签中发送指令即可创建会话</div>
         </div>
       ) : (
-        <>
-          <div className="task-list">
-            {steps.map((step) => (
-              <div key={step.id} className="task-step">
-                <div className={`step-icon ${getStepIconClass(step)}`}>
-                  {getStepIcon(step)}
-                </div>
-                <div className="step-content">
-                  <div className="step-name">{getStepName(step)}</div>
-                  {getStepDetail(step) && (
-                    <div className="step-detail">{getStepDetail(step)}</div>
-                  )}
-                </div>
+        <div className="session-list">
+          {sessions.map((s) => {
+            const isRunning = runningSessionIds.includes(s.id)
+            const isCurrent = s.id === widgetAgentSessionId
+            const isConfirming = confirmingId === s.id
+            return (
+              <div
+                key={s.id}
+                className={`session-item ${isRunning ? 'running' : ''} ${isCurrent ? 'current' : ''}`}
+                onClick={() => !isConfirming && onEnterSession(s.id)}
+              >
+                {isConfirming ? (
+                  <div className="session-confirm">
+                    <span>确认删除？</span>
+                    <button className="confirm-del" onClick={(e) => { e.stopPropagation(); void handleDelete(s.id) }}>
+                      删除
+                    </button>
+                    <button className="confirm-cancel" onClick={(e) => { e.stopPropagation(); setConfirmingId(null) }}>
+                      取消
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="session-info">
+                      <div className="session-title-row">
+                        {isRunning && <span className="session-running-dot" />}
+                        <span className="session-title">{s.title || '新会话'}</span>
+                        {isCurrent && <span className="session-current-badge">当前</span>}
+                      </div>
+                      <div className="session-meta">
+                        <span>{formatTime(s.updatedAt)}</span>
+                        <span className="session-status">{isRunning ? '运行中' : '已完成'}</span>
+                      </div>
+                    </div>
+                    <button
+                      className="session-delete-btn"
+                      onClick={(e) => { e.stopPropagation(); setConfirmingId(s.id) }}
+                      title="删除"
+                    >
+                      {ICONS.trash}
+                    </button>
+                    <span className="session-enter-icon">{ICONS.enter}</span>
+                  </>
+                )}
               </div>
-            ))}
-          </div>
-          {isRunning && (
-            <button className="stop-task-btn" onClick={handleStopTask}>
-              停止任务
-            </button>
-          )}
-        </>
+            )
+          })}
+        </div>
       )}
     </div>
   )

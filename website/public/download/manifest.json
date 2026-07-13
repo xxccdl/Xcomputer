@@ -1,13 +1,15 @@
 ﻿{
     "desktop":  {
-                    "version":  "0.2.63",
+                    "version":  "0.2.64",
                     "updatedAt":  "2026-07-13",
-                    "sizeBytes":  499470159,
-                    "filename":  "Xcomputer-0.2.63-setup.exe",
-                    "url":  "/download/Xcomputer-0.2.63-setup.exe",
+                    "sizeBytes":  499471495,
+                    "filename":  "Xcomputer-0.2.64-setup.exe",
+                    "url":  "/download/Xcomputer-0.2.64-setup.exe",
                     "size":  "476.3 MB",
                     "releaseNotes":  [
-                                         "修复付费 pro 模式下 usePaidPro 变量名错误导致的运行时崩溃（ReferenceError）"
+                                         "小组件「任务」标签升级为会话列表：查看所有会话、删除管理、点击进入 Agent 对话",
+                                         "运行中会话显示脉动绿点指示器，当前会话高亮标记",
+                                         "支持从任务列表直接进入对应会话的智能对话，继续 Agent 执行"
                                      ]
                 },
     "mobile":  {

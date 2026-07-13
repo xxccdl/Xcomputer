@@ -1,6 +1,6 @@
 {
   "name": "xcomputer",
-  "version": "0.2.63",
+  "version": "0.2.64",
   "description": "Xcomputer by xxccdl — AI 桌面自动化助手，一句话让 AI 操控你的电脑",
   "main": "./out/main/index.js",
   "author": "xxccdl",

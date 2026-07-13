@@ -33,6 +33,10 @@ const IPC = {
   WIDGET_ASK_REQUEST: 'widget:askRequest',
   WIDGET_ASK_RESPONSE: 'widget:askResponse',
   WIDGET_AGENT_REFRESH: 'widget:agentRefresh',
+  // 会话列表管理
+  WIDGET_LIST_SESSIONS: 'widget:listSessions',
+  WIDGET_DELETE_SESSION: 'widget:deleteSession',
+  WIDGET_LOAD_SESSION: 'widget:loadSession',
   // 确认/提问已解决广播（与主窗口共享通道名）
   CHAT_CONFIRM_RESOLVED: 'chat:confirmResolved',
   CHAT_ASK_RESOLVED: 'chat:askResolved'
@@ -166,6 +170,21 @@ interface AgentState {
   isRunning: boolean
 }
 
+/** 会话元信息（内联类型） */
+interface WidgetSessionInfo {
+  id: string
+  title: string
+  createdAt: number
+  updatedAt: number
+}
+
+/** 会话列表查询结果 */
+interface WidgetSessionListResult {
+  sessions: WidgetSessionInfo[]
+  widgetAgentSessionId: string | null
+  runningSessionIds: string[]
+}
+
 const widgetApi = {
   /** 发送对话消息（简单模式，无 agent） */
   chatSend(text: string): Promise<void> {
@@ -267,6 +286,18 @@ const widgetApi = {
   /** 拉取 agent 状态（窗口重开时调用，恢复任务历史和当前状态） */
   agentGetState(): Promise<AgentState> {
     return ipcRenderer.invoke(IPC.WIDGET_AGENT_GET_STATE)
+  },
+  /** 查询所有会话列表 + 运行状态 */
+  listSessions(): Promise<WidgetSessionListResult> {
+    return ipcRenderer.invoke(IPC.WIDGET_LIST_SESSIONS)
+  },
+  /** 删除指定会话 */
+  deleteSession(sessionId: string): Promise<void> {
+    return ipcRenderer.invoke(IPC.WIDGET_DELETE_SESSION, sessionId)
+  },
+  /** 加载已有会话到 widget agent（切换当前 agent 会话） */
+  loadSession(sessionId: string): Promise<string> {
+    return ipcRenderer.invoke(IPC.WIDGET_LOAD_SESSION, sessionId)
   },
   /** 响应高危确认 */
   respondConfirm(requestId: string, allowed: boolean): Promise<void> {
