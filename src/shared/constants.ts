@@ -247,6 +247,31 @@ export const IPC_CHANNELS = {
   WIDGET_TASK_ERROR: 'widget:taskError', // 任务出错推送
   WIDGET_HIDE: 'widget:hide', // 隐藏 widget 窗口
   WIDGET_STOP_TASK: 'widget:stopTask', // 停止主窗口当前任务
+  WIDGET_GET_QUOTA: 'widget:getQuota', // 查询积分（限免 + 付费）
+  WIDGET_GET_SETTINGS: 'widget:getSettings', // 查询当前设置
+  WIDGET_UPDATE_SETTINGS: 'widget:updateSettings', // 更新设置（部分字段）
+  WIDGET_QUOTA_UPDATED: 'widget:quotaUpdated', // 推送积分更新到 widget 窗口
+  WIDGET_BUY_CREDITS: 'widget:buyCredits', // 打开主窗口购买积分面板
+  WIDGET_OPEN_SETTINGS: 'widget:openSettings', // 打开主窗口完整设置面板
+
+  // Widget Agent 模式（独立 session 的 agent 执行）
+  WIDGET_AGENT_SEND: 'widget:agentSend', // 发送 agent 指令（forceTask）
+  WIDGET_AGENT_STOP: 'widget:agentStop', // 中断当前 agent 任务
+  WIDGET_AGENT_NEW_SESSION: 'widget:agentNewSession', // 新建 agent 会话（清空历史）
+  WIDGET_AGENT_GET_STATE: 'widget:agentGetState', // 拉取当前 agent 状态（messages + currentStatus + isRunning）
+  WIDGET_AGENT_STEP: 'widget:agentStep', // agent 步骤推送（友好状态）
+  WIDGET_AGENT_DONE: 'widget:agentDone', // agent 任务完成
+  WIDGET_AGENT_ERROR: 'widget:agentError', // agent 任务出错
+  WIDGET_AGENT_MESSAGE: 'widget:agentMessage', // agent 消息推送（用户/助手/系统消息）
+  WIDGET_CONFIRM_REQUEST: 'widget:confirmRequest', // 高危确认请求（转发自 CHAT_CONFIRM_REQUEST，source=widget）
+  WIDGET_CONFIRM_RESPONSE: 'widget:confirmResponse', // 高危确认响应（widget → 主进程）
+  WIDGET_ASK_REQUEST: 'widget:askRequest', // AI 提问请求（source=widget）
+  WIDGET_ASK_RESPONSE: 'widget:askResponse', // AI 提问响应（widget → 主进程）
+  WIDGET_AGENT_REFRESH: 'widget:agentRefresh', // 窗口重新显示时触发状态刷新
+
+  // 确认/提问已解决广播（主进程 → 所有窗口，用于自动关闭对话框）
+  CHAT_CONFIRM_RESOLVED: 'chat:confirmResolved',
+  CHAT_ASK_RESOLVED: 'chat:askResolved',
 
   // 本地模型（实验性）：node-llama-cpp 进程内推理
   LOCAL_MODEL_GET_STATUS: 'localModel:getStatus', // 查询当前状态

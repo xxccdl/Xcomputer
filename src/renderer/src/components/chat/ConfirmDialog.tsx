@@ -8,22 +8,34 @@ export function ConfirmDialog(): JSX.Element | null {
 
   useEffect(() => {
     const unsub = window.api.chat.onConfirmRequest((req) => {
+      // 过滤 widget 来源的请求（由小组件 ConfirmBanner 自身处理，主窗口不显示）
+      if (req.source === 'widget') return
       setQueue((prev) => [...prev, req])
     })
-    return unsub
+    // 监听确认已解决广播：widget 响应或超时后自动移除队列中的该请求
+    const unsubResolved = window.api.chat.onConfirmResolved(({ requestId }) => {
+      setQueue((prev) => prev.filter((r) => r.requestId !== requestId))
+    })
+    return () => {
+      unsub()
+      unsubResolved()
+    }
   }, [])
 
   const current = queue[0] ?? null
 
-  const handleRespond = useCallback(async (allowed: boolean): Promise<void> => {
-    if (!current) return
-    await window.api.chat.respondConfirm(current.requestId, allowed)
-    setQueue((prev) => prev.slice(1))
-    // 如果队列已空（没有更多确认框），恢复焦点到输入框
-    if (queue.length <= 1) {
-      setTimeout(() => focusChatInput(), 100)
-    }
-  }, [current, queue.length])
+  const handleRespond = useCallback(
+    async (allowed: boolean): Promise<void> => {
+      if (!current) return
+      await window.api.chat.respondConfirm(current.requestId, allowed)
+      setQueue((prev) => prev.slice(1))
+      // 如果队列已空（没有更多确认框），恢复焦点到输入框
+      if (queue.length <= 1) {
+        setTimeout(() => focusChatInput(), 100)
+      }
+    },
+    [current, queue.length]
+  )
 
   // Escape 键拒绝当前确认请求
   useEffect(() => {

@@ -5,7 +5,7 @@ interface FloatingBallAPI {
   getState(): Promise<FloatingBallStatusPayload>
   onStateChange(cb: (payload: FloatingBallStatusPayload) => void): () => void
   click(): void
-  action(action: 'showMain' | 'hideMain' | 'newSession' | 'stopTask'): void
+  action(action: 'showMain' | 'hideMain' | 'newSession' | 'stopTask' | 'showWidget'): void
   drag(deltaX: number, deltaY: number): void
   dragStart(): void
   dragEnd(): void
@@ -56,6 +56,14 @@ const STATE_CONFIG: Record<
 }
 
 const ICONS = {
+  widget: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="4" width="6" height="6" rx="1" />
+      <rect x="14" y="4" width="6" height="6" rx="1" />
+      <rect x="4" y="14" width="6" height="6" rx="1" />
+      <rect x="14" y="14" width="6" height="6" rx="1" />
+    </svg>
+  ),
   showMain: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -293,7 +301,7 @@ export function FloatingBall(): JSX.Element {
   }, [showMenu])
 
   // 菜单项点击
-  const handleAction = (action: 'showMain' | 'hideMain' | 'newSession' | 'stopTask'): void => {
+  const handleAction = (action: 'showMain' | 'hideMain' | 'newSession' | 'stopTask' | 'showWidget'): void => {
     console.log(`[FloatingBall] action: ${action}`)
     window.floatingBallApi?.action(action)
     setShowMenu(false)
@@ -394,6 +402,15 @@ export function FloatingBall(): JSX.Element {
           onMouseEnter={updateMouseEventsFromHover}
           onMouseLeave={updateMouseEventsFromHover}
         >
+          <button
+            className="ball-menu-item"
+            title="XC 桌面组件"
+            onMouseDown={(e) => e.stopPropagation()}
+            onMouseEnter={() => window.floatingBallApi?.setMouseEventsEnabled(true)}
+            onClick={() => handleAction('showWidget')}
+          >
+            {ICONS.widget}
+          </button>
           <button
             className="ball-menu-item"
             title="显示主窗口"

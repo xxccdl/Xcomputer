@@ -2,6 +2,8 @@ import { BrowserWindow, screen, shell } from 'electron'
 import { is } from '@electron-toolkit/utils'
 import { join } from 'path'
 import { logger } from '../utils/logger'
+import { IPC_CHANNELS } from '@shared/constants'
+import { isWidgetBlurLocked } from '../ipc/widget.ipc'
 
 let widgetWindow: BrowserWindow | null = null
 
@@ -12,8 +14,8 @@ export function createWidgetWindow(): BrowserWindow {
   }
 
   const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
-  const widgetWidth = 420
-  const widgetHeight = 560
+  const widgetWidth = 380
+  const widgetHeight = 520
 
   widgetWindow = new BrowserWindow({
     width: widgetWidth,
@@ -50,9 +52,21 @@ export function createWidgetWindow(): BrowserWindow {
   })
 
   // blur 时自动隐藏（点击外部区域关闭 widget）
+  // blur 锁定时（有 pending 高危确认/提问）跳过自动隐藏，防止用户错过确认
   widgetWindow.on('blur', () => {
     if (widgetWindow && !widgetWindow.isDestroyed() && widgetWindow.isVisible()) {
+      if (isWidgetBlurLocked()) {
+        logger.info('[Widget] blur 锁定中，跳过自动隐藏（有 pending 确认/提问）')
+        return
+      }
       widgetWindow.hide()
+    }
+  })
+
+  // 窗口重新显示时通知 renderer 刷新 agent 状态（恢复任务历史和未完成任务）
+  widgetWindow.on('show', () => {
+    if (widgetWindow && !widgetWindow.isDestroyed() && !widgetWindow.webContents.isDestroyed()) {
+      widgetWindow.webContents.send(IPC_CHANNELS.WIDGET_AGENT_REFRESH)
     }
   })
 

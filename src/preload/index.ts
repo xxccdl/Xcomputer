@@ -96,6 +96,17 @@ const api = {
     respondConfirm(requestId: string, allowed: boolean): Promise<void> {
       return ipcRenderer.invoke(IPC_CHANNELS.CHAT_CONFIRM_RESPONSE, requestId, allowed)
     },
+    /** 监听确认已解决广播（widget 响应后主窗口 ConfirmDialog 自动移除该请求） */
+    onConfirmResolved(
+      cb: Listener<{ requestId: string; allowed: boolean }>
+    ): Unsubscribe {
+      const handler = (
+        _e: IpcRendererEvent,
+        payload: { requestId: string; allowed: boolean }
+      ): void => cb(payload)
+      ipcRenderer.on(IPC_CHANNELS.CHAT_CONFIRM_RESOLVED, handler)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.CHAT_CONFIRM_RESOLVED, handler)
+    },
     onAskRequest(cb: Listener<AskRequest>): Unsubscribe {
       const handler = (_e: IpcRendererEvent, payload: AskRequest): void => cb(payload)
       ipcRenderer.on(IPC_CHANNELS.CHAT_ASK_REQUEST, handler)
@@ -103,6 +114,17 @@ const api = {
     },
     respondAsk(requestId: string, answer: string, skipped: boolean): Promise<void> {
       return ipcRenderer.invoke(IPC_CHANNELS.CHAT_ASK_RESPONSE, requestId, answer, skipped)
+    },
+    /** 监听提问已解决广播 */
+    onAskResolved(
+      cb: Listener<{ requestId: string; answer: string; skipped: boolean }>
+    ): Unsubscribe {
+      const handler = (
+        _e: IpcRendererEvent,
+        payload: { requestId: string; answer: string; skipped: boolean }
+      ): void => cb(payload)
+      ipcRenderer.on(IPC_CHANNELS.CHAT_ASK_RESOLVED, handler)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.CHAT_ASK_RESOLVED, handler)
     },
     onError(cb: Listener<{ sessionId: string; error: string }>): Unsubscribe {
       const handler = (_e: IpcRendererEvent, payload: { sessionId: string; error: string }): void =>
@@ -330,6 +352,20 @@ const api = {
       const handler = (_e: IpcRendererEvent, action: string): void => cb(action)
       ipcRenderer.on(IPC_CHANNELS.FLOATING_BALL_ACTION, handler)
       return () => ipcRenderer.removeListener(IPC_CHANNELS.FLOATING_BALL_ACTION, handler)
+    }
+  },
+  widget: {
+    /** 监听 widget 请求打开购买积分面板 */
+    onBuyCredits(cb: () => void): Unsubscribe {
+      const handler = (): void => cb()
+      ipcRenderer.on(IPC_CHANNELS.WIDGET_BUY_CREDITS, handler)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.WIDGET_BUY_CREDITS, handler)
+    },
+    /** 监听 widget 请求打开完整设置面板 */
+    onOpenSettings(cb: () => void): Unsubscribe {
+      const handler = (): void => cb()
+      ipcRenderer.on(IPC_CHANNELS.WIDGET_OPEN_SETTINGS, handler)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.WIDGET_OPEN_SETTINGS, handler)
     }
   },
   schedule: {

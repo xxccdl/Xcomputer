@@ -143,6 +143,8 @@ export interface StepEvent {
   screenshotPath?: string
   timestamp: number
   error?: string
+  /** 事件来源：用于 widget 路由（main=主窗口，widget=小组件 agent） */
+  source?: 'main' | 'widget'
 }
 
 /** 高危工具确认请求 */
@@ -152,6 +154,8 @@ export interface ConfirmRequest {
   toolName: string
   toolArgs: unknown
   reason: string
+  /** 请求来源：widget 来源由小组件自身确认，主窗口 ConfirmDialog 过滤掉 */
+  source?: 'main' | 'widget'
 }
 
 export interface ConfirmResponse {
@@ -168,6 +172,8 @@ export interface AskRequest {
   options?: string[]
   /** 可选的默认值/占位提示 */
   placeholder?: string
+  /** 请求来源：widget 来源由小组件自身回答 */
+  source?: 'main' | 'widget'
 }
 
 export interface AskResponse {

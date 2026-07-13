@@ -83,6 +83,20 @@ export function TitleBar(): JSX.Element {
     return () => window.removeEventListener('xcomputer:open-modal', handler)
   }, [])
 
+  // 监听 widget 窗口请求打开购买/设置面板
+  useEffect(() => {
+    const unsubBuy = window.api.widget.onBuyCredits(() => {
+      setPurchaseOpen(true)
+    })
+    const unsubSettings = window.api.widget.onOpenSettings(() => {
+      setSettingsOpen(true)
+    })
+    return () => {
+      unsubBuy()
+      unsubSettings()
+    }
+  }, [])
+
   const isWindows = window.api.platform === 'win32'
 
   /** 关闭模态框后延迟恢复焦点到聊天输入框 */

@@ -4,6 +4,7 @@ import { logger } from '../utils/logger'
 import { focusBrowserWindow } from '../utils/window-focus'
 import { floatingBallState } from '../utils/floating-ball-state'
 import { getFloatingBallWindow } from '../windows/floating-ball-window'
+import { toggleWidget } from '../windows/widget-window'
 
 let registered = false
 
@@ -65,6 +66,9 @@ export function registerFloatingBallIpc(mainWindow: BrowserWindow): void {
         break
       case 'stopTask':
         stopTaskCallback?.()
+        break
+      case 'showWidget':
+        toggleWidget()
         break
       default:
         logger.warn(`[FloatingBall] unknown action: ${action}`)

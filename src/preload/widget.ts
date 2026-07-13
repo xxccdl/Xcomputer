@@ -12,7 +12,30 @@ const IPC = {
   WIDGET_TASK_DONE: 'widget:taskDone',
   WIDGET_TASK_ERROR: 'widget:taskError',
   WIDGET_HIDE: 'widget:hide',
-  WIDGET_STOP_TASK: 'widget:stopTask'
+  WIDGET_STOP_TASK: 'widget:stopTask',
+  WIDGET_GET_QUOTA: 'widget:getQuota',
+  WIDGET_GET_SETTINGS: 'widget:getSettings',
+  WIDGET_UPDATE_SETTINGS: 'widget:updateSettings',
+  WIDGET_QUOTA_UPDATED: 'widget:quotaUpdated',
+  WIDGET_BUY_CREDITS: 'widget:buyCredits',
+  WIDGET_OPEN_SETTINGS: 'widget:openSettings',
+  // Widget Agent 模式
+  WIDGET_AGENT_SEND: 'widget:agentSend',
+  WIDGET_AGENT_STOP: 'widget:agentStop',
+  WIDGET_AGENT_NEW_SESSION: 'widget:agentNewSession',
+  WIDGET_AGENT_GET_STATE: 'widget:agentGetState',
+  WIDGET_AGENT_STEP: 'widget:agentStep',
+  WIDGET_AGENT_DONE: 'widget:agentDone',
+  WIDGET_AGENT_ERROR: 'widget:agentError',
+  WIDGET_AGENT_MESSAGE: 'widget:agentMessage',
+  WIDGET_CONFIRM_REQUEST: 'widget:confirmRequest',
+  WIDGET_CONFIRM_RESPONSE: 'widget:confirmResponse',
+  WIDGET_ASK_REQUEST: 'widget:askRequest',
+  WIDGET_ASK_RESPONSE: 'widget:askResponse',
+  WIDGET_AGENT_REFRESH: 'widget:agentRefresh',
+  // 确认/提问已解决广播（与主窗口共享通道名）
+  CHAT_CONFIRM_RESOLVED: 'chat:confirmResolved',
+  CHAT_ASK_RESOLVED: 'chat:askResolved'
 } as const
 
 type Listener<T> = (payload: T) => void
@@ -35,6 +58,111 @@ interface TaskStepInfo {
 interface TaskState {
   sessionId: string | null
   steps: TaskStepInfo[]
+  isRunning: boolean
+}
+
+/** 限免积分配额（内联类型，避免引入 shared chunk） */
+interface RelayQuotaInfo {
+  used: number
+  limit: number
+  remaining: number
+  date: string
+  paid: {
+    balance: number
+    earliestExpiringAt: string | null
+    totalPurchased: number
+  } | null
+}
+
+/** 付费积分余额 */
+interface PaidQuotaInfo {
+  balance: number
+  totalPurchased: number
+  totalConsumed: number
+  firstPurchaseAt: string | null
+  lastPurchaseAt: string | null
+  earliestExpiringAt: string | null
+}
+
+/** Widget 查询积分返回的聚合结构 */
+interface WidgetQuota {
+  /** 限免模式积分（非限免模式为 null） */
+  relay: RelayQuotaInfo | null
+  /** 付费积分余额（查询失败为 null） */
+  paid: PaidQuotaInfo | null
+  /** 是否处于限免模式 */
+  isRelayMode: boolean
+}
+
+/** Widget 查询/更新设置所需的最小子集（避免引入完整 Settings 类型） */
+interface WidgetSettings {
+  relayMode: boolean
+  relayModelPreference: 'flash' | 'pro'
+  openXEnabled: boolean
+  openXToken: string
+  deepThinking: boolean
+  thinkingEffort: 'high' | 'max'
+  deepseekApiKey: string
+  [key: string]: unknown
+}
+
+/** Agent 步骤事件（内联类型，避免引入 shared chunk） */
+interface AgentStepEvent {
+  sessionId: string
+  stepId: string
+  messageId: string
+  type: 'thinking' | 'deep_thinking' | 'tool_call' | 'tool_result' | 'error' | 'final'
+  status: 'pending' | 'running' | 'success' | 'error' | 'skipped'
+  content: string
+  toolName?: string
+  toolArgs?: unknown
+  toolResult?: unknown
+  timestamp: number
+  error?: string
+  source?: 'main' | 'widget'
+}
+
+/** Agent 消息（内联类型） */
+interface AgentMessage {
+  id: string
+  sessionId: string
+  role: 'user' | 'assistant' | 'system'
+  content: string | unknown[]
+  createdAt: number
+}
+
+/** 高危确认请求（内联类型） */
+interface WidgetConfirmRequest {
+  requestId: string
+  sessionId: string
+  toolName: string
+  toolArgs: unknown
+  reason: string
+  source?: 'main' | 'widget'
+}
+
+/** AI 提问请求（内联类型） */
+interface WidgetAskRequest {
+  requestId: string
+  sessionId: string
+  question: string
+  options?: string[]
+  placeholder?: string
+  source?: 'main' | 'widget'
+}
+
+/** Agent 友好状态（与主进程 FriendlyStatus 一致） */
+interface FriendlyStatus {
+  text: string
+  icon?: 'thinking' | 'working' | 'confirm' | 'done' | 'error'
+  detail?: string
+}
+
+/** Agent 状态（agentGetState 返回） */
+interface AgentState {
+  sessionId: string | null
+  messages: AgentMessage[]
+  currentStatus: FriendlyStatus | null
   isRunning: boolean
 }
 
@@ -94,6 +222,123 @@ const widgetApi = {
     const handler = (_e: IpcRendererEvent, payload: { sessionId: string; error: string }): void => cb(payload)
     ipcRenderer.on(IPC.WIDGET_TASK_ERROR, handler)
     return () => ipcRenderer.removeListener(IPC.WIDGET_TASK_ERROR, handler)
+  },
+  /** 查询积分（限免 + 付费聚合） */
+  getQuota(): Promise<WidgetQuota> {
+    return ipcRenderer.invoke(IPC.WIDGET_GET_QUOTA)
+  },
+  /** 查询当前设置 */
+  getSettings(): Promise<WidgetSettings> {
+    return ipcRenderer.invoke(IPC.WIDGET_GET_SETTINGS)
+  },
+  /** 更新设置（部分字段，合并写入） */
+  updateSettings(partial: Partial<WidgetSettings>): Promise<WidgetSettings> {
+    return ipcRenderer.invoke(IPC.WIDGET_UPDATE_SETTINGS, partial)
+  },
+  /** 打开主窗口购买积分面板 */
+  buyCredits(): void {
+    ipcRenderer.send(IPC.WIDGET_BUY_CREDITS)
+  },
+  /** 打开主窗口完整设置面板 */
+  openMainSettings(): void {
+    ipcRenderer.send(IPC.WIDGET_OPEN_SETTINGS)
+  },
+  /** 监听积分更新推送（AI 请求完成后自动刷新） */
+  onQuotaUpdated(cb: Listener<WidgetQuota>): Unsubscribe {
+    const handler = (_e: IpcRendererEvent, payload: WidgetQuota): void => cb(payload)
+    ipcRenderer.on(IPC.WIDGET_QUOTA_UPDATED, handler)
+    return () => ipcRenderer.removeListener(IPC.WIDGET_QUOTA_UPDATED, handler)
+  },
+
+  // ============ Agent 模式 ============
+
+  /** 发送 agent 指令（自动执行工具调用，强制 task 模式） */
+  agentSend(text: string): Promise<void> {
+    return ipcRenderer.invoke(IPC.WIDGET_AGENT_SEND, text)
+  },
+  /** 中断当前 agent 任务 */
+  agentStop(): Promise<void> {
+    return ipcRenderer.invoke(IPC.WIDGET_AGENT_STOP)
+  },
+  /** 新建 agent 会话（清空历史） */
+  agentNewSession(): Promise<string> {
+    return ipcRenderer.invoke(IPC.WIDGET_AGENT_NEW_SESSION)
+  },
+  /** 拉取 agent 状态（窗口重开时调用，恢复任务历史和当前状态） */
+  agentGetState(): Promise<AgentState> {
+    return ipcRenderer.invoke(IPC.WIDGET_AGENT_GET_STATE)
+  },
+  /** 响应高危确认 */
+  respondConfirm(requestId: string, allowed: boolean): Promise<void> {
+    return ipcRenderer.invoke(IPC.WIDGET_CONFIRM_RESPONSE, requestId, allowed)
+  },
+  /** 响应 AI 提问 */
+  respondAsk(requestId: string, answer: string, skipped: boolean): Promise<void> {
+    return ipcRenderer.invoke(IPC.WIDGET_ASK_RESPONSE, requestId, answer, skipped)
+  },
+  /** 监听 agent 步骤更新（友好状态推送） */
+  onAgentStep(cb: Listener<AgentStepEvent>): Unsubscribe {
+    const handler = (_e: IpcRendererEvent, step: AgentStepEvent): void => cb(step)
+    ipcRenderer.on(IPC.WIDGET_AGENT_STEP, handler)
+    return () => ipcRenderer.removeListener(IPC.WIDGET_AGENT_STEP, handler)
+  },
+  /** 监听 agent 消息（用户/助手/系统消息） */
+  onAgentMessage(cb: Listener<AgentMessage>): Unsubscribe {
+    const handler = (_e: IpcRendererEvent, msg: AgentMessage): void => cb(msg)
+    ipcRenderer.on(IPC.WIDGET_AGENT_MESSAGE, handler)
+    return () => ipcRenderer.removeListener(IPC.WIDGET_AGENT_MESSAGE, handler)
+  },
+  /** 监听 agent 任务完成 */
+  onAgentDone(cb: Listener<{ sessionId: string }>): Unsubscribe {
+    const handler = (_e: IpcRendererEvent, payload: { sessionId: string }): void => cb(payload)
+    ipcRenderer.on(IPC.WIDGET_AGENT_DONE, handler)
+    return () => ipcRenderer.removeListener(IPC.WIDGET_AGENT_DONE, handler)
+  },
+  /** 监听 agent 任务出错 */
+  onAgentError(cb: Listener<{ sessionId: string; error: string }>): Unsubscribe {
+    const handler = (
+      _e: IpcRendererEvent,
+      payload: { sessionId: string; error: string }
+    ): void => cb(payload)
+    ipcRenderer.on(IPC.WIDGET_AGENT_ERROR, handler)
+    return () => ipcRenderer.removeListener(IPC.WIDGET_AGENT_ERROR, handler)
+  },
+  /** 监听高危确认请求（显示 ConfirmBanner） */
+  onConfirmRequest(cb: Listener<WidgetConfirmRequest>): Unsubscribe {
+    const handler = (_e: IpcRendererEvent, req: WidgetConfirmRequest): void => cb(req)
+    ipcRenderer.on(IPC.WIDGET_CONFIRM_REQUEST, handler)
+    return () => ipcRenderer.removeListener(IPC.WIDGET_CONFIRM_REQUEST, handler)
+  },
+  /** 监听 AI 提问请求 */
+  onAskRequest(cb: Listener<WidgetAskRequest>): Unsubscribe {
+    const handler = (_e: IpcRendererEvent, req: WidgetAskRequest): void => cb(req)
+    ipcRenderer.on(IPC.WIDGET_ASK_REQUEST, handler)
+    return () => ipcRenderer.removeListener(IPC.WIDGET_ASK_REQUEST, handler)
+  },
+  /** 监听确认/提问已解决（自动关闭 ConfirmBanner） */
+  onConfirmResolved(cb: Listener<{ requestId: string; allowed: boolean }>): Unsubscribe {
+    const handler = (
+      _e: IpcRendererEvent,
+      payload: { requestId: string; allowed: boolean }
+    ): void => cb(payload)
+    ipcRenderer.on(IPC.CHAT_CONFIRM_RESOLVED, handler)
+    return () => ipcRenderer.removeListener(IPC.CHAT_CONFIRM_RESOLVED, handler)
+  },
+  onAskResolved(
+    cb: Listener<{ requestId: string; answer: string; skipped: boolean }>
+  ): Unsubscribe {
+    const handler = (
+      _e: IpcRendererEvent,
+      payload: { requestId: string; answer: string; skipped: boolean }
+    ): void => cb(payload)
+    ipcRenderer.on(IPC.CHAT_ASK_RESOLVED, handler)
+    return () => ipcRenderer.removeListener(IPC.CHAT_ASK_RESOLVED, handler)
+  },
+  /** 监听窗口重新显示（触发状态刷新） */
+  onAgentRefresh(cb: () => void): Unsubscribe {
+    const handler = (): void => cb()
+    ipcRenderer.on(IPC.WIDGET_AGENT_REFRESH, handler)
+    return () => ipcRenderer.removeListener(IPC.WIDGET_AGENT_REFRESH, handler)
   }
 }
 

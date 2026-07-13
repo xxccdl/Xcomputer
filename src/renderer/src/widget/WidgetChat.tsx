@@ -1,11 +1,29 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Send, Square, Sparkles } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
 interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
+}
+
+const ICONS = {
+  send: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 2L11 13" />
+      <path d="M22 2L15 22L11 13L2 9L22 2z" />
+    </svg>
+  ),
+  stop: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="6" y="6" width="12" height="12" rx="1" />
+    </svg>
+  ),
+  sparkle: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2l1.5 6.5L20 10l-6.5 1.5L12 18l-1.5-6.5L4 10l6.5-1.5L12 2z" />
+    </svg>
+  )
 }
 
 export function WidgetChat(): JSX.Element {
@@ -16,7 +34,6 @@ export function WidgetChat(): JSX.Element {
   const scrollRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // 自动滚动到底部
   const scrollToBottom = useCallback(() => {
     const el = scrollRef.current
     if (el) {
@@ -28,7 +45,6 @@ export function WidgetChat(): JSX.Element {
     scrollToBottom()
   }, [messages, streamingText, scrollToBottom])
 
-  // 监听流式事件
   useEffect(() => {
     const unsubDelta = window.widgetApi.onChatDelta((delta) => {
       setStreamingText((prev) => prev + delta)
@@ -39,10 +55,7 @@ export function WidgetChat(): JSX.Element {
       setIsStreaming(false)
     })
     const unsubError = window.widgetApi.onChatError((error) => {
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: `⚠️ ${error}` }
-      ])
+      setMessages((prev) => [...prev, { role: 'assistant', content: `[错误] ${error}` }])
       setStreamingText('')
       setIsStreaming(false)
     })
@@ -53,7 +66,6 @@ export function WidgetChat(): JSX.Element {
     }
   }, [])
 
-  // 自适应输入框高度
   const adjustTextareaHeight = () => {
     const el = textareaRef.current
     if (el) {
@@ -70,7 +82,6 @@ export function WidgetChat(): JSX.Element {
     setInput('')
     setStreamingText('')
     setIsStreaming(true)
-    // 重置输入框高度
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
@@ -82,14 +93,13 @@ export function WidgetChat(): JSX.Element {
       setStreamingText('')
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: '⚠️ 发送失败，请重试' }
+        { role: 'assistant', content: '[错误] 发送失败，请重试' }
       ])
     }
   }
 
   const handleStop = () => {
     void window.widgetApi.chatStop()
-    // 保留已接收的部分作为回复
     if (streamingText) {
       setMessages((prev) => [...prev, { role: 'assistant', content: streamingText }])
     }
@@ -106,13 +116,10 @@ export function WidgetChat(): JSX.Element {
 
   return (
     <div className="chat-area">
-      {/* 消息列表 */}
       <div className="messages-scroll" ref={scrollRef}>
         {messages.length === 0 && !isStreaming ? (
           <div className="empty-state">
-            <div className="icon">
-              <Sparkles size={20} style={{ color: '#a5b4fc' }} />
-            </div>
+            <div className="icon">{ICONS.sparkle}</div>
             <div className="title">XC 快捷对话</div>
             <div className="hint">输入问题，快速获取 AI 回答</div>
           </div>
@@ -127,7 +134,6 @@ export function WidgetChat(): JSX.Element {
                 )}
               </div>
             ))}
-            {/* 流式输出 */}
             {isStreaming && (
               <div className="message assistant">
                 {streamingText ? (
@@ -138,7 +144,12 @@ export function WidgetChat(): JSX.Element {
                     <span className="streaming-cursor" />
                   </>
                 ) : (
-                  <span style={{ opacity: 0.5 }}>思考中...</span>
+                  <div className="thinking-ripple">
+                    <span className="thinking-ripple-text">正在思考</span>
+                    <span className="thinking-ripple-dot" />
+                    <span className="thinking-ripple-dot" />
+                    <span className="thinking-ripple-dot" />
+                  </div>
                 )}
               </div>
             )}
@@ -146,7 +157,6 @@ export function WidgetChat(): JSX.Element {
         )}
       </div>
 
-      {/* 输入栏 */}
       <div className="input-bar">
         <div className="input-wrapper">
           <textarea
@@ -157,14 +167,14 @@ export function WidgetChat(): JSX.Element {
               adjustTextareaHeight()
             }}
             onKeyDown={handleKeyDown}
-            placeholder="输入消息... (Enter 发送, Shift+Enter 换行)"
+            placeholder="输入消息... (Enter 发送)"
             rows={1}
             autoFocus
           />
         </div>
         {isStreaming ? (
           <button className="send-btn stop" onClick={handleStop} title="停止">
-            <Square size={14} fill="currentColor" />
+            {ICONS.stop}
           </button>
         ) : (
           <button
@@ -173,7 +183,7 @@ export function WidgetChat(): JSX.Element {
             disabled={!input.trim()}
             title="发送"
           >
-            <Send size={14} />
+            {ICONS.send}
           </button>
         )}
       </div>

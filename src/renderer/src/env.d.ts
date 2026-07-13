@@ -61,8 +61,12 @@ interface XcomputerAPI {
     onMessage(cb: Listener<Message>): Unsubscribe
     onConfirmRequest(cb: Listener<ConfirmRequest>): Unsubscribe
     respondConfirm(requestId: string, allowed: boolean): Promise<void>
+    /** 监听确认已解决广播（widget 响应后主窗口 ConfirmDialog 自动移除该请求） */
+    onConfirmResolved(cb: Listener<{ requestId: string; allowed: boolean }>): Unsubscribe
     onAskRequest(cb: Listener<AskRequest>): Unsubscribe
     respondAsk(requestId: string, answer: string, skipped: boolean): Promise<void>
+    /** 监听提问已解决广播 */
+    onAskResolved(cb: Listener<{ requestId: string; answer: string; skipped: boolean }>): Unsubscribe
     onError(cb: Listener<{ sessionId: string; error: string }>): Unsubscribe
     onDone(cb: Listener<{ sessionId: string }>): Unsubscribe
     onTodoUpdate(cb: Listener<TodoListState>): Unsubscribe

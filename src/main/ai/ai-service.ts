@@ -292,10 +292,11 @@ class AiService {
     const s = settingsStore.get()
     const relay = this.isRelayMode()
     const openXProxy = this.isOpenXProxyActive
-    // OpenX 代理模式：不扣积分，使用用户配置的模型；限免模式：付费用户可切 pro
-    const usePro = relay && !openXProxy && s.relayModelPreference === 'pro' && this.getPaidBalance() >= PAID_CREDITS.PRO_COST
-    const fastModelKey = (relay && !openXProxy) ? RELAY_MODEL : s.fastModel
-    const proModelKey = (relay && !openXProxy) ? (usePro ? PAID_PRO_MODEL : RELAY_MODEL) : s.proModel
+    // OpenX 代理模式下 getProviderConfig 会自动路由到 OX 代理 URL；
+    // 模型名和参数逻辑仍按限免模式走（限免积分/排队/温度等）
+    const usePro = relay && s.relayModelPreference === 'pro' && this.getPaidBalance() >= PAID_CREDITS.PRO_COST
+    const fastModelKey = relay ? RELAY_MODEL : s.fastModel
+    const proModelKey = relay ? (usePro ? PAID_PRO_MODEL : RELAY_MODEL) : s.proModel
     const fastConfig = this.getProviderConfig(fastModelKey)
     // 限免模式下，proClient 与 fastConfig 共用中继 baseURL
     const proConfig = relay ? fastConfig : this.getProviderConfig(proModelKey)
@@ -355,8 +356,6 @@ class AiService {
   /** 限免模式下 proClient 实际使用的模型（付费用户可切 pro） */
   private get effectiveProModel(): string {
     if (this.isLocalModelActive()) return LOCAL_MODEL_NAME
-    // OpenX 代理模式：不扣积分，直接用用户配置的 pro 模型
-    if (this.isOpenXProxyActive) return settingsStore.get().proModel
     if (!this.isRelayMode()) return this.proModel
     const s = settingsStore.get()
     if (s.relayModelPreference === 'pro' && this.getPaidBalance() >= PAID_CREDITS.PRO_COST) {
@@ -368,16 +367,12 @@ class AiService {
   /** 快速模型：限免模式强制返回 flash，忽略用户设置；本地模型返回 LOCAL_MODEL_NAME */
   get fastModel(): string {
     if (this.isLocalModelActive()) return LOCAL_MODEL_NAME
-    // OpenX 代理模式：不扣积分，直接用用户配置的模型
-    if (this.isOpenXProxyActive) return settingsStore.get().fastModel
     return this.isRelayMode() ? RELAY_MODEL : settingsStore.get().fastModel
   }
 
   /** 专业模型：限免模式下付费用户可用 pro，否则强制 flash；本地模型返回 LOCAL_MODEL_NAME */
   get proModel(): string {
     if (this.isLocalModelActive()) return LOCAL_MODEL_NAME
-    // OpenX 代理模式：不扣积分，直接用用户配置的 pro 模型
-    if (this.isOpenXProxyActive) return settingsStore.get().proModel
     if (!this.isRelayMode()) return settingsStore.get().proModel
     const s = settingsStore.get()
     if (s.relayModelPreference === 'pro' && this.getPaidBalance() >= PAID_CREDITS.PRO_COST) {
@@ -389,8 +384,6 @@ class AiService {
   /** 深度思考：本地模型不支持思考；限免 flash 强制关闭；付费 pro 模型允许开启 */
   get deepThinkingEnabled(): boolean {
     if (this.isLocalModelActive()) return false
-    // OpenX 代理模式：不扣积分，按用户设置决定
-    if (this.isOpenXProxyActive) return settingsStore.get().deepThinking
     if (!this.isRelayMode()) return settingsStore.get().deepThinking
     // 限免模式：仅当使用付费 pro 模型时才允许思考
     return this.effectiveProModel === PAID_PRO_MODEL && settingsStore.get().deepThinking
@@ -681,8 +674,7 @@ class AiService {
     const proModel = this.effectiveProModel
     const isKimi = this.isKimiK27Code(proModel)
     const isRelay = this.isRelayMode()
-    const isOpenXProxy = this.isOpenXProxyActive
-    const isPaidPro = isRelay && !isOpenXProxy && proModel === PAID_PRO_MODEL
+    const isPaidPro = isRelay && proModel === PAID_PRO_MODEL
     const isLocal = this.isLocalModelActive()
 
     const createParams: Record<string, unknown> = {
@@ -700,9 +692,9 @@ class AiService {
       createParams.tools = tools.map((t) => ({ function: { name: t.function.name } }))
     }
 
-    if (isLocal) {
+    if (this.isLocalModelActive()) {
       createParams.temperature = 0.7
-    } else if (isPaidPro) {
+    } else if (usePaidPro) {
       // 付费 pro 模式：支持 thinking（与正常 DeepSeek pro 一致）
       if (useThinking) {
         createParams.reasoning_effort = this.thinkingEffort
@@ -711,7 +703,7 @@ class AiService {
         createParams.thinking = { type: 'disabled' }
         createParams.temperature = 0.2
       }
-    } else if (isRelay && !isOpenXProxy) {
+    } else if (isRelay) {
       // 限免 flash 模式：不支持 thinking 参数，仅传 temperature
       createParams.temperature = 0.3
     } else if (isKimi) {

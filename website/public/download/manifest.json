@@ -1,17 +1,15 @@
 ﻿{
     "desktop":  {
-                    "version":  "0.2.60",
+                    "version":  "0.2.62",
                     "updatedAt":  "2026-07-13",
-                    "sizeBytes":  499457395,
-                    "filename":  "Xcomputer-0.2.60-setup.exe",
-                    "url":  "/download/Xcomputer-0.2.60-setup.exe",
+                    "sizeBytes":  499470268,
+                    "filename":  "Xcomputer-0.2.62-setup.exe",
+                    "url":  "/download/Xcomputer-0.2.62-setup.exe",
                     "size":  "476.3 MB",
                     "releaseNotes":  [
-                                         "修复新建对话时界面极易无响应的问题（消除会话切换中的状态不一致中间帧）",
-                                         "修复悬浮球拖拽时窗口越拖越大的问题（改用 setBounds 原子操作防止尺寸漂移）",
-                                         "安装程序新增磁盘空间不足警告，防止解压大文件静默失败",
-                                         "安装向导新增隐私政策与用户服务协议页面（中文 GBK 编码，无乱码）",
-                                         "官网新增隐私政策与用户条款页面（hash 路由 #/privacy、#/terms）"
+                                         "小组件新增「智能」模式：支持 Agent 自动执行，友好状态提示（正在思考/正在操控你的电脑等）",
+                                         "小组件 Agent 模式遇高危操作时可直接在小组件内确认，窗口关闭再开仍保持任务进度",
+                                         "小组件思考状态使用水波纹动画，自然流体风格"
                                      ]
                 },
     "mobile":  {

@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Check, Loader2, Circle, AlertCircle, Square } from 'lucide-react'
 
 interface TaskStep {
   id: string
@@ -21,6 +20,36 @@ interface TaskState {
   isRunning: boolean
 }
 
+const ICONS = {
+  check: (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 13l4 4L19 7" />
+    </svg>
+  ),
+  spinner: (
+    <svg className="spin" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12a9 9 0 11-6.219-8.56" />
+    </svg>
+  ),
+  dot: (
+    <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <circle cx="12" cy="12" r="6" />
+    </svg>
+  ),
+  alert: (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 9v4M12 17h.01" />
+      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+    </svg>
+  ),
+  empty: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M9 9h6v6H9z" />
+    </svg>
+  )
+}
+
 export function TaskProgress(): JSX.Element {
   const [taskState, setTaskState] = useState<TaskState>({
     sessionId: null,
@@ -28,7 +57,6 @@ export function TaskProgress(): JSX.Element {
     isRunning: false
   })
 
-  // 拉取初始状态
   const refreshState = useCallback(async () => {
     try {
       const state = await window.widgetApi.getTaskState()
@@ -41,7 +69,6 @@ export function TaskProgress(): JSX.Element {
   useEffect(() => {
     void refreshState()
 
-    // 监听实时任务事件
     const unsubStep = window.widgetApi.onTaskStep(() => {
       void refreshState()
     })
@@ -52,7 +79,6 @@ export function TaskProgress(): JSX.Element {
       void refreshState()
     })
 
-    // 定期刷新（任务进行中时每 2 秒拉取一次最新步骤）
     const interval = setInterval(() => {
       void refreshState()
     }, 2000)
@@ -75,7 +101,6 @@ export function TaskProgress(): JSX.Element {
 
   const { steps, isRunning, sessionId } = taskState
 
-  // 获取步骤显示名
   const getStepName = (step: TaskStep): string => {
     if (step.toolName) return step.toolName
     const typeMap: Record<string, string> = {
@@ -89,21 +114,11 @@ export function TaskProgress(): JSX.Element {
     return typeMap[step.type] || step.type
   }
 
-  // 获取步骤状态图标
   const getStepIcon = (step: TaskStep): JSX.Element => {
-    if (step.status === 'done' || step.status === 'completed') {
-      return <Check size={11} />
-    }
-    if (step.status === 'running' || step.status === 'pending') {
-      if (step.status === 'running') {
-        return <Loader2 size={11} className="spin" />
-      }
-      return <Circle size={8} />
-    }
-    if (step.status === 'error') {
-      return <AlertCircle size={11} />
-    }
-    return <Circle size={8} />
+    if (step.status === 'done' || step.status === 'completed') return ICONS.check
+    if (step.status === 'running') return ICONS.spinner
+    if (step.status === 'error') return ICONS.alert
+    return ICONS.dot
   }
 
   const getStepIconClass = (step: TaskStep): string => {
@@ -113,7 +128,6 @@ export function TaskProgress(): JSX.Element {
     return 'pending'
   }
 
-  // 截断内容
   const getStepDetail = (step: TaskStep): string => {
     if (step.error) return step.error.slice(0, 80)
     if (step.content) return step.content.slice(0, 80)
@@ -136,11 +150,9 @@ export function TaskProgress(): JSX.Element {
 
       {steps.length === 0 ? (
         <div className="empty-state">
-          <div className="icon">
-            <Square size={18} style={{ color: 'rgba(255,255,255,0.3)' }} />
-          </div>
+          <div className="icon">{ICONS.empty}</div>
           <div className="title">暂无任务进度</div>
-          <div className="hint">在主窗口中发送任务指令后，<br />可在此查看实时进度</div>
+          <div className="hint">在主窗口中发送任务指令后，可在此查看实时进度</div>
         </div>
       ) : (
         <>

@@ -15,10 +15,19 @@ export function AskDialog(): JSX.Element | null {
 
   useEffect(() => {
     const unsub = window.api.chat.onAskRequest((req) => {
+      // 过滤 widget 来源的请求（由小组件自身处理，主窗口不显示）
+      if (req.source === 'widget') return
       setRequest(req)
       setAnswer('')
     })
-    return unsub
+    // 监听提问已解决广播：widget 响应或超时后自动关闭主窗口的 AskDialog
+    const unsubResolved = window.api.chat.onAskResolved(({ requestId }) => {
+      setRequest((prev) => (prev?.requestId === requestId ? null : prev))
+    })
+    return () => {
+      unsub()
+      unsubResolved()
+    }
   }, [])
 
   // 自动聚焦输入框

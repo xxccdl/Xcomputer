@@ -65,6 +65,9 @@ export class TaskOrchestrator {
   /** 每个会话当前的工作模式（默认 task = 自动执行） */
   private sessionMode = new Map<string, ChatMode>()
 
+  /** 每个会话的事件来源（main=主窗口，widget=小组件 agent），用于事件路由 */
+  private sessionSources = new Map<string, 'main' | 'widget'>()
+
   constructor(private mainWindow: BrowserWindow) {
     // 监听 TodoList 变更，推送到前端操作详情面板
     todoListEvents.on('change', (payload: { sessionId: string; items: unknown[] }) => {
@@ -87,6 +90,16 @@ export class TaskOrchestrator {
     this.sessionMode.set(sessionId, mode)
     this.safeSend(IPC_CHANNELS.CHAT_MODE_CHANGED, { sessionId, mode })
     logger.info(`[Orchestrator] 会话 ${sessionId} 模式切换为 ${mode}`)
+  }
+
+  /** 标记会话来源（main=主窗口，widget=小组件 agent），供事件路由使用 */
+  markSessionSource(sessionId: string, source: 'main' | 'widget'): void {
+    this.sessionSources.set(sessionId, source)
+  }
+
+  /** 获取会话来源（未标记时默认 main） */
+  getSessionSource(sessionId: string): 'main' | 'widget' {
+    return this.sessionSources.get(sessionId) ?? 'main'
   }
 
   /**
@@ -155,6 +168,8 @@ export class TaskOrchestrator {
       clearTimeout(entry.timer)
       entry.resolver(allowed)
       pendingConfirms.delete(requestId)
+      // 广播确认已解决，让所有窗口（主窗口 ConfirmDialog / widget ConfirmBanner）自动移除该请求
+      this.safeSend(IPC_CHANNELS.CHAT_CONFIRM_RESOLVED, { requestId, allowed })
     }
   }
 
@@ -165,11 +180,22 @@ export class TaskOrchestrator {
       clearTimeout(entry.timer)
       entry.resolver(answer, skipped)
       pendingAsks.delete(requestId)
+      // 广播提问已解决，让所有窗口自动移除该请求
+      this.safeSend(IPC_CHANNELS.CHAT_ASK_RESOLVED, { requestId, answer, skipped })
     }
   }
 
   /** 主入口：处理用户消息 */
-  async handleUserMessage(sessionId: string, text: string): Promise<void> {
+  async handleUserMessage(
+    sessionId: string,
+    text: string,
+    options?: { forceTask?: boolean; source?: 'main' | 'widget' }
+  ): Promise<void> {
+    // 标记会话来源（widget agent 的事件需路由到小组件窗口）
+    if (options?.source) {
+      this.markSessionSource(sessionId, options.source)
+    }
+
     // 如果该会话已有任务在运行，先中断它，避免并发覆盖导致旧任务无法被 abort
     const existingTask = runningTasks.get(sessionId)
     if (existingTask && !existingTask.aborted) {
@@ -270,7 +296,11 @@ export class TaskOrchestrator {
       //   意图分类，4B 模型 JSON 输出不可靠且增加一次推理延迟）
       let intentType: 'chat' | 'task'
       const isLocalModel = aiService.isLocalModelActive()
-      if (currentMode === 'plan' || currentMode === 'spec') {
+      if (options?.forceTask) {
+        // 小组件 Agent 模式强制走 task（Agent 循环），跳过意图分类
+        intentType = 'task'
+        logger.info('Intent: task (forced by widget agent)')
+      } else if (currentMode === 'plan' || currentMode === 'spec') {
         intentType = 'task'
         logger.info(`Intent: task (forced by mode=${currentMode})`)
       } else if (this.detectTaskKeyword(text)) {
@@ -868,16 +898,20 @@ export class TaskOrchestrator {
         if (pendingConfirms.has(requestId)) {
           pendingConfirms.delete(requestId)
           resolve(false)
+          // 超时也广播 resolved，让 UI 自动清理
+          this.safeSend(IPC_CHANNELS.CHAT_CONFIRM_RESOLVED, { requestId, allowed: false })
         }
       }, 60000)
       pendingConfirms.set(requestId, { resolver: resolve, timer })
 
+      const source = this.getSessionSource(sessionId)
       const req: ConfirmRequest = {
         requestId,
         sessionId,
         toolName,
         toolArgs,
-        reason: `${toolName} 属于高危操作，需要您确认`
+        reason: `${toolName} 属于高危操作，需要您确认`,
+        source
       }
       this.safeSend(IPC_CHANNELS.CHAT_CONFIRM_REQUEST, req)
 
@@ -887,8 +921,11 @@ export class TaskOrchestrator {
         '⚠️ 需要确认高危操作',
         `工具: ${toolName}\n参数: ${argsPreview}\n\n请在弹出的对话框中进行操作（60 秒内未响应将自动拒绝）。`,
         () => {
-          // 点击通知时聚焦主窗口，让用户看到确认对话框
-          if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+          // 点击通知时聚焦对应窗口：widget 来源聚焦 widget，否则聚焦主窗口
+          if (source === 'widget') {
+            // widget 的 ConfirmBanner 会随事件显示，这里仅尝试聚焦 widget 窗口
+            // （getWidgetWindow 在 widget-window.ts，避免循环依赖，通过 remote listener 已推送）
+          } else if (this.mainWindow && !this.mainWindow.isDestroyed()) {
             focusBrowserWindow(this.mainWindow)
           }
         }
@@ -925,16 +962,19 @@ export class TaskOrchestrator {
         if (pendingAsks.has(requestId)) {
           pendingAsks.delete(requestId)
           resolve({ answer: '', skipped: true })
+          this.safeSend(IPC_CHANNELS.CHAT_ASK_RESOLVED, { requestId, answer: '', skipped: true })
         }
       }, 300000)
       pendingAsks.set(requestId, { resolver: (answer, skipped) => resolve({ answer, skipped }), timer })
 
+      const source = this.getSessionSource(sessionId)
       const req: AskRequest = {
         requestId,
         sessionId,
         question,
         options,
-        placeholder
+        placeholder,
+        source
       }
       this.safeSend(IPC_CHANNELS.CHAT_ASK_REQUEST, req)
 
@@ -1249,7 +1289,9 @@ export class TaskOrchestrator {
       toolResult: data.toolResult,
       screenshotPath: data.screenshotPath,
       timestamp: Date.now(),
-      error: data.error
+      error: data.error,
+      // 注入来源标记，widget.ipc 的 remote listener 据此路由到 WIDGET_AGENT_* 通道
+      source: this.getSessionSource(sessionId)
     }
     this.safeSend(IPC_CHANNELS.CHAT_STEP, event)
 

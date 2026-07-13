@@ -6,6 +6,7 @@ import { sessionsStore } from '../store/sessions'
 import { aiService } from '../ai/ai-service'
 import { logger } from '../utils/logger'
 import { setCreateSessionCallback, setStopTaskCallback } from './floating-ball.ipc'
+import { pushQuotaToWidget } from './widget.ipc'
 
 export function registerChatIpc(mainWindow: BrowserWindow): void {
   const orchestrator = initOrchestrator(mainWindow)
@@ -50,6 +51,8 @@ export function registerChatIpc(mainWindow: BrowserWindow): void {
       if (quota) {
         safeSend(IPC_CHANNELS.AI_RELAY_QUOTA_UPDATED, quota)
       }
+      // 同步推送积分更新到 widget 窗口（启动签到 / 支付成功后也刷新 widget）
+      void pushQuotaToWidget()
     } catch (err) {
       logger.warn('[chat.ipc] 推送限免积分失败:', err instanceof Error ? err.message : String(err))
     }
@@ -86,6 +89,7 @@ export function registerChatIpc(mainWindow: BrowserWindow): void {
             logger.warn('[chat.ipc] 推送付费余额失败:', err instanceof Error ? err.message : String(err))
           }
         })()
+        // pushRelayQuotaUpdate 内部已调用 pushQuotaToWidget 同步刷新 widget
       }, 500)
     }
   })
