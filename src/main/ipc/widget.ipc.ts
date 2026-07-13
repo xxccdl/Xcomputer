@@ -241,14 +241,24 @@ export function registerWidgetIpc(mainWindow: BrowserWindow): void {
         // source==='widget' 的确认请求转发到 widget，主窗口 ConfirmDialog 会过滤掉
         if (req?.source === 'widget') {
           setBlurLock(true) // 锁定 blur，防止窗口自动隐藏
-          exitWidgetMiniMode() // 若 widget 处于 mini 模式，先展开为全尺寸以显示确认横幅
+          // 确保窗口可见且展开（agent 可能在 widget 隐藏/mini 时请求确认）
+          const win = getWidgetWindow()
+          if (win && !win.isDestroyed() && !win.isVisible()) {
+            win.show()
+          }
+          exitWidgetMiniMode() // 若 widget 处于 mini 模式，展开为全尺寸以显示确认横幅
           sendToWidget(IPC_CHANNELS.WIDGET_CONFIRM_REQUEST, req)
         }
       } else if (channel === IPC_CHANNELS.CHAT_ASK_REQUEST) {
         const req = data as AskRequest
         if (req?.source === 'widget') {
           setBlurLock(true)
-          exitWidgetMiniMode() // 若 widget 处于 mini 模式，先展开为全尺寸以显示提问
+          // 确保窗口可见且展开（agent 可能在 widget 隐藏/mini 时提问）
+          const win = getWidgetWindow()
+          if (win && !win.isDestroyed() && !win.isVisible()) {
+            win.show()
+          }
+          exitWidgetMiniMode() // 若 widget 处于 mini 模式，展开为全尺寸以显示提问
           sendToWidget(IPC_CHANNELS.WIDGET_ASK_REQUEST, req)
         }
       } else if (
@@ -355,7 +365,18 @@ export function registerWidgetIpc(mainWindow: BrowserWindow): void {
     // 异步执行，不阻塞 IPC 返回（事件流通过 WIDGET_AGENT_* 推送）
     // 立即标记 agent 为运行中，确保 blur 时能正确进入 mini 模式（而非直接隐藏）
     widgetAgentRunning = true
-    void orchestrator.handleUserMessage(sessionId, text, { forceTask: true, source: 'widget' })
+    void orchestrator
+      .handleUserMessage(sessionId, text, { forceTask: true, source: 'widget' })
+      .catch((err) => {
+        // orchestrator 启动失败时清理状态，防止 widgetAgentRunning 永远为 true
+        // 导致 widget 永远进入 mini 模式而无法正常隐藏
+        logger.error('[Widget] agent 启动失败:', err)
+        widgetAgentRunning = false
+        sendToWidget(IPC_CHANNELS.WIDGET_AGENT_ERROR, {
+          sessionId,
+          error: err instanceof Error ? err.message : String(err)
+        })
+      })
   })
 
   // 中断当前 agent 任务

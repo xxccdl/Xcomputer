@@ -41,6 +41,15 @@ interface WidgetConfirmRequest {
   reason: string
 }
 
+/** AI 提问请求（与 preload 内联类型一致） */
+interface WidgetAskRequest {
+  requestId: string
+  sessionId: string
+  question: string
+  options?: string[]
+  placeholder?: string
+}
+
 /** Agent 状态（agentGetState 返回） */
 interface AgentState {
   sessionId: string | null

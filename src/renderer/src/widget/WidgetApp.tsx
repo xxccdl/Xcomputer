@@ -50,6 +50,22 @@ const TABS: Array<{ key: Tab; label: string; icon: JSX.Element }> = [
   { key: 'settings', label: '设置', icon: ICONS.settings }
 ]
 
+/** Agent 步骤事件（与 WidgetAgent 内联类型一致，用于 MiniStatusBar） */
+interface AgentStepEvent {
+  sessionId: string
+  stepId: string
+  messageId: string
+  type: 'thinking' | 'deep_thinking' | 'tool_call' | 'tool_result' | 'error' | 'final'
+  status: 'pending' | 'running' | 'success' | 'error' | 'skipped'
+  content: string
+  toolName?: string
+  toolArgs?: unknown
+  toolResult?: unknown
+  timestamp: number
+  error?: string
+  source?: 'main' | 'widget'
+}
+
 /** Mini 模式下显示的状态药丸（监听 agent 步骤，显示当前友好状态） */
 function MiniStatusBar(): JSX.Element {
   const [statusText, setStatusText] = useState('Xcomputer 正在工作')

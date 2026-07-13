@@ -462,6 +462,14 @@ interface XcomputerAPI {
     /** 获取当前应用版本号 */
     getVersion(): Promise<string>
   }
+
+  /** Widget 窗口请求（主窗口监听 widget 发来的打开购买/设置面板请求） */
+  widget: {
+    /** 监听 widget 请求打开购买积分面板 */
+    onBuyCredits(cb: () => void): Unsubscribe
+    /** 监听 widget 请求打开完整设置面板 */
+    onOpenSettings(cb: () => void): Unsubscribe
+  }
 }
 
 declare global {

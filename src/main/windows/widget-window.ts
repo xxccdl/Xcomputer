@@ -183,6 +183,20 @@ export function createWidgetWindow(): BrowserWindow {
       isMiniMode = false
       fullModeBounds = null
     }
+    // 防御性尺寸恢复：若窗口在 mini 模式下被隐藏（如 WIDGET_HIDE），
+    // 再次 show 时尺寸仍是 mini（240×44），需恢复为全尺寸以免 UI 被裁剪
+    if (widgetWindow && !widgetWindow.isDestroyed()) {
+      const bounds = widgetWindow.getBounds()
+      if (bounds.width !== FULL_WIDTH || bounds.height !== FULL_HEIGHT) {
+        const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
+        widgetWindow.setBounds({
+          x: Math.round((screenWidth - FULL_WIDTH) / 2),
+          y: Math.round((screenHeight - FULL_HEIGHT) / 2),
+          width: FULL_WIDTH,
+          height: FULL_HEIGHT
+        })
+      }
+    }
     if (widgetWindow && !widgetWindow.isDestroyed() && !widgetWindow.webContents.isDestroyed()) {
       widgetWindow.webContents.send(IPC_CHANNELS.WIDGET_AGENT_REFRESH)
       widgetWindow.webContents.send(IPC_CHANNELS.WIDGET_FULL_MODE)
