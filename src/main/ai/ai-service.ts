@@ -694,7 +694,7 @@ class AiService {
 
     if (this.isLocalModelActive()) {
       createParams.temperature = 0.7
-    } else if (usePaidPro) {
+    } else if (isPaidPro) {
       // 付费 pro 模式：支持 thinking（与正常 DeepSeek pro 一致）
       if (useThinking) {
         createParams.reasoning_effort = this.thinkingEffort

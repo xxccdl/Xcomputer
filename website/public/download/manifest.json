@@ -1,15 +1,13 @@
 ﻿{
     "desktop":  {
-                    "version":  "0.2.62",
+                    "version":  "0.2.63",
                     "updatedAt":  "2026-07-13",
-                    "sizeBytes":  499470268,
-                    "filename":  "Xcomputer-0.2.62-setup.exe",
-                    "url":  "/download/Xcomputer-0.2.62-setup.exe",
+                    "sizeBytes":  499470159,
+                    "filename":  "Xcomputer-0.2.63-setup.exe",
+                    "url":  "/download/Xcomputer-0.2.63-setup.exe",
                     "size":  "476.3 MB",
                     "releaseNotes":  [
-                                         "小组件新增「智能」模式：支持 Agent 自动执行，友好状态提示（正在思考/正在操控你的电脑等）",
-                                         "小组件 Agent 模式遇高危操作时可直接在小组件内确认，窗口关闭再开仍保持任务进度",
-                                         "小组件思考状态使用水波纹动画，自然流体风格"
+                                         "修复付费 pro 模式下 usePaidPro 变量名错误导致的运行时崩溃（ReferenceError）"
                                      ]
                 },
     "mobile":  {
