@@ -118,37 +118,40 @@ export function registerFloatingBallIpc(mainWindow: BrowserWindow): void {
       const win = getFloatingBallWindow()
       if (!win) return
       const BALL_SIZE = 88
-      // 用 screen.getCursorScreenPoint() 获取鼠标位置（与轮询中的坐标系一致），
-      // 避免 DOM 事件 e.screenX（物理像素）与 screen API（逻辑像素）在高 DPI 下不一致
       const cursor = screen.getCursorScreenPoint()
       const [wx, wy] = win.getPosition()
-      const [w] = win.getSize()
-      if (w !== BALL_SIZE) {
-        const centerX = wx + w / 2
-        const centerY = wy + w / 2
-        win.setBounds(
-          {
-            x: Math.round(centerX - BALL_SIZE / 2),
-            y: Math.round(centerY - BALL_SIZE / 2),
-            width: BALL_SIZE,
-            height: BALL_SIZE
-          },
-          false
-        )
-        // resize 后重新获取位置
-        const [nx, ny] = win.getPosition()
-        dragOffsetX = cursor.x - nx
-        dragOffsetY = cursor.y - ny
-      } else {
-        dragOffsetX = cursor.x - wx
-        dragOffsetY = cursor.y - wy
-      }
+      const [currentW] = win.getSize()
+      const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
 
       // 清除上一次未正常结束的轮询（兜底）
       if (dragInterval) {
         clearInterval(dragInterval)
         dragInterval = null
       }
+
+      // 计算初始窗口位置：如果菜单展开（120x120），保持视觉中心不变收缩到 88x88；
+      // 如果已是球体大小，保持鼠标按下点相对窗口的偏移不变
+      let initX: number
+      let initY: number
+      if (currentW !== BALL_SIZE) {
+        const centerX = wx + currentW / 2
+        const centerY = wy + currentW / 2
+        initX = Math.max(0, Math.min(screenWidth - BALL_SIZE, Math.round(centerX - BALL_SIZE / 2)))
+        initY = Math.max(0, Math.min(screenHeight - BALL_SIZE, Math.round(centerY - BALL_SIZE / 2)))
+      } else {
+        dragOffsetX = cursor.x - wx
+        dragOffsetY = cursor.y - wy
+        initX = Math.max(0, Math.min(screenWidth - BALL_SIZE, Math.round(cursor.x - dragOffsetX)))
+        initY = Math.max(0, Math.min(screenHeight - BALL_SIZE, Math.round(cursor.y - dragOffsetY)))
+      }
+
+      // 用 setBounds 原子性地设置初始大小和位置
+      win.setBounds({ x: initX, y: initY, width: BALL_SIZE, height: BALL_SIZE }, false)
+
+      // 以实际位置重新计算精确 offset（确保窗口紧跟鼠标）
+      const [finalX, finalY] = win.getPosition()
+      dragOffsetX = cursor.x - finalX
+      dragOffsetY = cursor.y - finalY
 
       dragInterval = setInterval(() => {
         const w = getFloatingBallWindow()
@@ -159,17 +162,13 @@ export function registerFloatingBallIpc(mainWindow: BrowserWindow): void {
           }
           return
         }
-        // 窗口大小保护：如果被意外改变（如 setMenuVisible 副作用），强制恢复到 88x88
-        const [cw] = w.getSize()
-        if (cw !== BALL_SIZE) {
-          w.setSize(BALL_SIZE, BALL_SIZE)
-        }
-        const cursor = screen.getCursorScreenPoint()
-        const { width: screenWidth, height: screenHeight } =
-          screen.getPrimaryDisplay().workAreaSize
-        const newX = Math.max(0, Math.min(screenWidth - BALL_SIZE, cursor.x - dragOffsetX))
-        const newY = Math.max(0, Math.min(screenHeight - BALL_SIZE, cursor.y - dragOffsetY))
-        w.setPosition(Math.round(newX), Math.round(newY), false)
+        const cur = screen.getCursorScreenPoint()
+        const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize
+        // 每帧用 setBounds 原子性地同时设置位置和大小（强制 88x88），
+        // 避免 setSize + setPosition 分离调用导致尺寸在 Windows DWM 合成器下漂移/累积
+        const newX = Math.max(0, Math.min(sw - BALL_SIZE, Math.round(cur.x - dragOffsetX)))
+        const newY = Math.max(0, Math.min(sh - BALL_SIZE, Math.round(cur.y - dragOffsetY)))
+        w.setBounds({ x: newX, y: newY, width: BALL_SIZE, height: BALL_SIZE }, false)
       }, 16)
     }
   )

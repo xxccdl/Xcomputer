@@ -78,10 +78,12 @@ export function useSession(): {
     }
 
     const s = await window.api.session.create()
+    // 先清空聊天状态，再切换会话，避免出现「新会话 ID + 旧消息」的中间状态。
+    // React 18 自动批处理确保 reset + addSession + setCurrent 合并为单次渲染，
+    // 消除了虚拟滚动/副作用在不一致数据上的重复计算，解决新建会话无响应问题。
+    reset()
     addSession(s)
     setCurrent(s.id)
-    // 延迟到下一帧执行 reset，让侧栏先渲染新会话高亮，避免同步卸载大量 ChatMessage 阻塞主线程
-    requestAnimationFrame(() => reset())
   }, [addSession, setCurrent, reset, currentSessionId])
 
   const selectSession = useCallback(
@@ -109,9 +111,10 @@ export function useSession(): {
 
       // 生成唯一请求 ID，用于竞态保护
       const requestId = ++selectRequestIdRef.current
+      // 先清空聊天状态，再切换会话，避免出现「新会话 ID + 旧消息」的中间状态，
+      // 防止虚拟滚动/副作用在不一致数据上重复计算导致界面无响应
+      reset()
       setCurrent(id)
-      // 延迟到下一帧执行 reset，让侧栏先渲染目标会话高亮，避免同步卸载大量 ChatMessage 阻塞主线程
-      requestAnimationFrame(() => reset())
       useChatStore.setState({ isLoadingSession: true })
 
       try {

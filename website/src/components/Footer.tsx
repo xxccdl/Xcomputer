@@ -170,10 +170,16 @@ export default function Footer() {
               关于
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {['项目介绍', '开源协议', '隐私政策', '联系我们'].map((l) => (
+              {[
+                { label: '项目介绍', href: '#' },
+                { label: '开源协议', href: '#' },
+                { label: '隐私政策', href: '#/privacy' },
+                { label: '用户条款', href: '#/terms' },
+                { label: '联系我们', href: '#' },
+              ].map((l) => (
                 <a
-                  key={l}
-                  href="#"
+                  key={l.label}
+                  href={l.href}
                   style={{
                     fontSize: '14px',
                     color: 'var(--text-muted)',
@@ -182,7 +188,7 @@ export default function Footer() {
                   onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text)')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
                 >
-                  {l}
+                  {l.label}
                 </a>
               ))}
             </div>

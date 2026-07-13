@@ -38,3 +38,19 @@
 
 ; ── 卸载页文案 ──
 !define MUI_UNWELCOMEFINISHPAGE_TEXT "此向导将从您的计算机中卸载 Xcomputer。$\r$\n$\r$\n点击「卸载」开始移除程序。"
+
+; ── 磁盘空间不足检查 ──
+; 在用户选择安装目录后验证可用空间，防止解压大文件（Xcomputer.exe ~173MB）时
+; 空间耗尽导致静默失败、快捷方式指向不存在的 exe
+!include FileFunc.nsh
+!define MUI_PAGE_DIRECTORY_CUSTOMFUNCTION_LEAVE CheckDiskSpace
+
+Function CheckDiskSpace
+  StrCpy $1 0                       ; 默认 0，若 DriveSpace 失败则触发警告
+  StrCpy $0 $INSTDIR 3              ; 提取驱动器根目录（如 "C:\"）
+  ${DriveSpace} "$0" "/D=F /S=M" $1 ; 获取可用空间（MB）
+  ; 至少需要 600 MB（安装约 500MB + 100MB 缓冲）
+  IntCmp $1 600 +3 0 +3             ; $1 >= 600 跳过警告，$1 < 600 继续
+  MessageBox MB_OK|MB_ICONEXCLAMATION "磁盘空间不足！$\r$\n$\r$\n驱动器 $0 仅剩 $1 MB 可用空间。$\r$\nXcomputer 安装至少需要 600 MB 可用空间。$\r$\n$\r$\n请释放磁盘空间或选择其他驱动器后重试。"
+  Abort
+FunctionEnd

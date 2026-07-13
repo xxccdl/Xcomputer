@@ -1,15 +1,17 @@
 ﻿{
     "desktop":  {
-                    "version":  "0.2.58",
+                    "version":  "0.2.60",
                     "updatedAt":  "2026-07-13",
-                    "sizeBytes":  499441010,
-                    "filename":  "Xcomputer-0.2.58-setup.exe",
-                    "url":  "/download/Xcomputer-0.2.58-setup.exe",
+                    "sizeBytes":  499457395,
+                    "filename":  "Xcomputer-0.2.60-setup.exe",
+                    "url":  "/download/Xcomputer-0.2.60-setup.exe",
                     "size":  "476.3 MB",
                     "releaseNotes":  [
-                                         "新增 XC 桌面组件：按 Ctrl+Shift+X+C 召唤半透明玻璃效果 mini 对话框",
-                                         "组件支持 AI 快捷对话（无 agent 模式）和实时任务进度查看",
-                                         "macOS 27 Liquid Glass 风格：backdrop-filter blur(40px) + 圆角 + 微妙边框光晕"
+                                         "修复新建对话时界面极易无响应的问题（消除会话切换中的状态不一致中间帧）",
+                                         "修复悬浮球拖拽时窗口越拖越大的问题（改用 setBounds 原子操作防止尺寸漂移）",
+                                         "安装程序新增磁盘空间不足警告，防止解压大文件静默失败",
+                                         "安装向导新增隐私政策与用户服务协议页面（中文 GBK 编码，无乱码）",
+                                         "官网新增隐私政策与用户条款页面（hash 路由 #/privacy、#/terms）"
                                      ]
                 },
     "mobile":  {
