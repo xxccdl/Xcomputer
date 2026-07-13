@@ -235,6 +235,19 @@ export const IPC_CHANNELS = {
   PAYMENT_GET_QUOTA: 'payment:getQuota', // 查询付费积分余额
   PAYMENT_QUOTA_UPDATED: 'payment:quotaUpdated', // 推送付费积分更新
 
+  // XC 桌面组件
+  WIDGET_CHAT_SEND: 'widget:chatSend', // 发送对话消息（简单模式，无 agent）
+  WIDGET_CHAT_STOP: 'widget:chatStop', // 中断当前对话
+  WIDGET_CHAT_DELTA: 'widget:chatDelta', // 流式输出增量推送
+  WIDGET_CHAT_DONE: 'widget:chatDone', // 对话完成
+  WIDGET_CHAT_ERROR: 'widget:chatError', // 对话出错
+  WIDGET_GET_TASK_STATE: 'widget:getTaskState', // 查询当前任务进度
+  WIDGET_TASK_STEP: 'widget:taskStep', // 任务步骤更新推送
+  WIDGET_TASK_DONE: 'widget:taskDone', // 任务完成推送
+  WIDGET_TASK_ERROR: 'widget:taskError', // 任务出错推送
+  WIDGET_HIDE: 'widget:hide', // 隐藏 widget 窗口
+  WIDGET_STOP_TASK: 'widget:stopTask', // 停止主窗口当前任务
+
   // 本地模型（实验性）：node-llama-cpp 进程内推理
   LOCAL_MODEL_GET_STATUS: 'localModel:getStatus', // 查询当前状态
   LOCAL_MODEL_DOWNLOAD: 'localModel:download', // 触发基座模型下载

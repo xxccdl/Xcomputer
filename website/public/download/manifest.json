@@ -1,15 +1,15 @@
 ﻿{
     "desktop":  {
-                    "version":  "0.2.57",
+                    "version":  "0.2.58",
                     "updatedAt":  "2026-07-13",
                     "sizeBytes":  499440441,
-                    "filename":  "Xcomputer-0.2.57-setup.exe",
-                    "url":  "/download/Xcomputer-0.2.57-setup.exe",
+                    "filename":  "Xcomputer-0.2.58-setup.exe",
+                    "url":  "/download/Xcomputer-0.2.58-setup.exe",
                     "size":  "476.3 MB",
                     "releaseNotes":  [
-                                         "修复新建对话 3 秒卡顿：降低虚拟化阈值 80→20，>20 条消息即启用虚拟滚动",
-                                         "延迟 reset() 到下一帧执行，侧栏先渲染新会话高亮（<16ms 响应）",
-                                         "虚拟化消息容器添加 contain: content 优化浏览器布局/绘制"
+                                         "新增 XC 桌面组件：按 Ctrl+Shift+X+C 召唤半透明玻璃效果 mini 对话框",
+                                         "组件支持 AI 快捷对话（无 agent 模式）和实时任务进度查看",
+                                         "macOS 27 Liquid Glass 风格：backdrop-filter blur(40px) + 圆角 + 微妙边框光晕"
                                      ]
                 },
     "mobile":  {

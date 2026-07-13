@@ -28,7 +28,8 @@ export default defineConfig({
         input: {
           index: resolve('src/preload/index.ts'),
           'floating-ball': resolve('src/preload/floating-ball.ts'),
-          'self-check': resolve('src/preload/self-check.ts')
+          'self-check': resolve('src/preload/self-check.ts'),
+          widget: resolve('src/preload/widget.ts')
         }
       }
     }
@@ -46,7 +47,8 @@ export default defineConfig({
         input: {
           index: resolve('src/renderer/index.html'),
           'floating-ball': resolve('src/renderer/floating-ball.html'),
-          'self-check': resolve('src/renderer/self-check.html')
+          'self-check': resolve('src/renderer/self-check.html'),
+          widget: resolve('src/renderer/widget.html')
         }
       }
     },

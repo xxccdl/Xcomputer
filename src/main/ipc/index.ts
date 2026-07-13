@@ -21,6 +21,7 @@ import { registerUpdateIpc } from './update.ipc'
 import { registerPaymentIpc } from './payment.ipc'
 import { registerLocalModelIpc } from './local-model.ipc'
 import { registerCustomSubagentsIpc } from './custom-subagents.ipc'
+import { registerWidgetIpc } from './widget.ipc'
 
 export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   registerSettingsIpc(mainWindow)
@@ -45,4 +46,5 @@ export function registerIpcHandlers(mainWindow: BrowserWindow): void {
   registerPaymentIpc(mainWindow)
   registerLocalModelIpc(mainWindow)
   registerCustomSubagentsIpc(mainWindow)
+  registerWidgetIpc(mainWindow)
 }

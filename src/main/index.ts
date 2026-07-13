@@ -11,6 +11,8 @@ import { mcpClient } from './mcp/mcp-client'
 import { terminalManager } from './tools/terminal-manager'
 import { createFloatingBallWindow, destroyFloatingBallWindow } from './windows/floating-ball-window'
 import { floatingBallState } from './utils/floating-ball-state'
+import { createWidgetWindow, destroyWidgetWindow, toggleWidget, getWidgetWindow } from './windows/widget-window'
+import { resetWidgetChat } from './ipc/widget.ipc'
 import { createTray, handleMainWindowClose, destroyTray, refreshTrayMenu } from './tray'
 import { memoryStore } from './store/memory'
 import { remoteControl } from './remote/remote-client'
@@ -107,6 +109,13 @@ app.whenReady().then(async () => {
   floatingBallWindow = createFloatingBallWindow()
   floatingBallState.setWindow(floatingBallWindow)
 
+  // 创建 XC 桌面组件窗口（隐藏状态，等待快捷键召唤）
+  const widgetWindow = createWidgetWindow()
+  // widget 窗口隐藏时清空对话历史（每次打开都是全新对话）
+  widgetWindow.on('hide', () => {
+    resetWidgetChat()
+  })
+
   // 启动定时任务调度器
   scheduleService.setMainWindow(mainWindow)
   scheduleService.start()
@@ -154,6 +163,16 @@ app.whenReady().then(async () => {
     logger.info('[App] 全局快捷键 Ctrl+Shift+X 已注册（显示/隐藏主窗口）')
   } else {
     logger.warn('[App] 全局快捷键 Ctrl+Shift+X 注册失败')
+  }
+
+  // Ctrl+Shift+X+C：召唤/隐藏 XC 桌面组件
+  const widgetRet = globalShortcut.register('CommandOrControl+Shift+X+C', () => {
+    toggleWidget()
+  })
+  if (widgetRet) {
+    logger.info('[App] 全局快捷键 Ctrl+Shift+X+C 已注册（召唤 XC 桌面组件）')
+  } else {
+    logger.warn('[App] 全局快捷键 Ctrl+Shift+X+C 注册失败')
   }
 
   logger.info('Xcomputer app ready')
@@ -249,6 +268,7 @@ app.on('before-quit', (e) => {
   globalShortcut.unregisterAll()
   destroyTray()
   destroyFloatingBallWindow()
+  destroyWidgetWindow()
   destroySelfCheckWindow()
   terminalManager.closeAll()
 
