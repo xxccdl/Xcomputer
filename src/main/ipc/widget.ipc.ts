@@ -203,9 +203,9 @@ export function registerWidgetIpc(mainWindow: BrowserWindow): void {
         if (!step?.sessionId) return
         // 区分来源：widget agent session 走 WIDGET_AGENT_*，其他走 WIDGET_TASK_*
         if (step.sessionId === widgetAgentSessionId) {
-          // 更新 widget agent 运行状态
-          widgetAgentRunning =
-            step.status !== 'success' && step.status !== 'error' && step.status !== 'skipped'
+          // 注意：不基于 step.status 更新 widgetAgentRunning
+          // 因为单个 step 的 success/error 仅表示该步骤完成，agent 整体可能仍在运行
+          // widgetAgentRunning 仅在 CHAT_DONE/CHAT_ERROR 时设为 false，在 WIDGET_AGENT_SEND 时设为 true
           sendToWidget(IPC_CHANNELS.WIDGET_AGENT_STEP, step)
         } else {
           activeTaskSessionId = step.sessionId
@@ -353,6 +353,8 @@ export function registerWidgetIpc(mainWindow: BrowserWindow): void {
     const orchestrator = getOrchestrator()
     if (!orchestrator) throw new Error('Orchestrator 未初始化')
     // 异步执行，不阻塞 IPC 返回（事件流通过 WIDGET_AGENT_* 推送）
+    // 立即标记 agent 为运行中，确保 blur 时能正确进入 mini 模式（而非直接隐藏）
+    widgetAgentRunning = true
     void orchestrator.handleUserMessage(sessionId, text, { forceTask: true, source: 'widget' })
   })
 
@@ -360,6 +362,7 @@ export function registerWidgetIpc(mainWindow: BrowserWindow): void {
   ipcMain.handle(IPC_CHANNELS.WIDGET_AGENT_STOP, async () => {
     if (widgetAgentSessionId) {
       getOrchestrator()?.abort(widgetAgentSessionId)
+      widgetAgentRunning = false
       logger.info(`[Widget] 已停止 agent 任务: ${widgetAgentSessionId}`)
     }
   })

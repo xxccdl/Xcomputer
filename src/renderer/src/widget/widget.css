@@ -1626,3 +1626,136 @@ html, body, #root {
   transform: scale(1.05);
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
 }
+
+/* === AI 提问 banner === */
+.ask-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  margin: 2px 10px 4px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 10px;
+  flex-shrink: 0;
+  animation: banner-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ask-icon-wrap {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: rgba(165, 180, 252, 0.9);
+  margin-top: 1px;
+}
+
+.ask-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ask-question {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.ask-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ask-option {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(199, 210, 254, 0.9);
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.ask-option:hover {
+  background: rgba(99, 102, 241, 0.3);
+  border-color: rgba(99, 102, 241, 0.5);
+  transform: scale(1.03);
+}
+
+.ask-input-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.ask-input {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 8px;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.ask-input:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ask-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.ask-submit {
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.ask-submit:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+}
+
+.ask-submit:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ask-skip {
+  align-self: flex-start;
+  padding: 2px 8px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.ask-skip:hover {
+  color: rgba(255, 255, 255, 0.5);
+}

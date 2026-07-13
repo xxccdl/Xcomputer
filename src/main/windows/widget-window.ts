@@ -70,9 +70,9 @@ export function enterMiniMode(): void {
   const currentBounds = win.getBounds()
   fullModeBounds = { x: currentBounds.x, y: currentBounds.y }
 
-  // mini 窗口定位到屏幕底部居中（如通知药丸）
+  // mini 窗口定位到屏幕右下角（不遮挡 AI 正在操作的区域）
   const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
-  const miniX = Math.round((screenWidth - MINI_WIDTH) / 2)
+  const miniX = Math.round(screenWidth - MINI_WIDTH - 16) // 距右侧 16px
   const miniY = Math.round(screenHeight - MINI_HEIGHT - 16) // 距底部 16px
 
   isMiniMode = true

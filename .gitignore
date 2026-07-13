@@ -64,6 +64,12 @@ website/dist/
 # 构建缓存
 *.tsbuildinfo
 
+# 发布脚本临时文件（gh-*/gitee-*/github-* 是发布时生成的 body/response JSON）
+# 保留 build/ 下的 icon、license、nsis 脚本等必要资源
+build/gh-*
+build/gitee-*
+build/github-*
+
 # 日志/调试文件
 *logcat*
 debug.log

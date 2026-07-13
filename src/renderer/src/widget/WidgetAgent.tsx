@@ -137,6 +137,8 @@ export function WidgetAgent(): JSX.Element {
   const [currentStatus, setCurrentStatus] = useState<FriendlyStatus | null>(null)
   const [isRunning, setIsRunning] = useState(false)
   const [confirmBanner, setConfirmBanner] = useState<WidgetConfirmRequest | null>(null)
+  const [askBanner, setAskBanner] = useState<WidgetAskRequest | null>(null)
+  const [askAnswer, setAskAnswer] = useState('')
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -150,7 +152,7 @@ export function WidgetAgent(): JSX.Element {
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages, currentStatus, confirmBanner, scrollToBottom])
+  }, [messages, currentStatus, confirmBanner, askBanner, scrollToBottom])
 
   // 1. 初始加载：拉取现有 agent 状态（恢复任务历史和未完成任务）
   useEffect(() => {
@@ -203,10 +205,24 @@ export function WidgetAgent(): JSX.Element {
       setConfirmBanner(req)
     })
 
+    // 监听 AI 提问请求（显示 AskBanner 供用户输入答案）
+    const unsubAsk = window.widgetApi.onAskRequest((req: WidgetAskRequest) => {
+      setAskBanner(req)
+      setAskAnswer('')
+    })
+
     // 监听确认已解决（超时或 widget 响应后自动关闭 banner）
     const unsubResolved = window.widgetApi.onConfirmResolved(
       ({ requestId }: { requestId: string; allowed: boolean }) => {
         setConfirmBanner((prev) => (prev?.requestId === requestId ? null : prev))
+      }
+    )
+
+    // 监听提问已解决（自动关闭 AskBanner）
+    const unsubAskResolved = window.widgetApi.onAskResolved(
+      ({ requestId }: { requestId: string; answer: string; skipped: boolean }) => {
+        setAskBanner((prev) => (prev?.requestId === requestId ? null : prev))
+        setAskAnswer('')
       }
     )
 
@@ -221,7 +237,9 @@ export function WidgetAgent(): JSX.Element {
       unsubDone()
       unsubError()
       unsubConfirm()
+      unsubAsk()
       unsubResolved()
+      unsubAskResolved()
       unsubRefresh()
     }
   }, [])
@@ -254,13 +272,33 @@ export function WidgetAgent(): JSX.Element {
     setConfirmBanner(null)
   }
 
-  // 5. 新建会话
+  // 5. AI 提问响应：提交答案
+  const handleAskSubmit = async (answer?: string): Promise<void> => {
+    if (!askBanner) return
+    const finalAnswer = answer ?? askAnswer
+    if (!finalAnswer.trim()) return
+    await window.widgetApi.respondAsk(askBanner.requestId, finalAnswer.trim(), false)
+    setAskBanner(null)
+    setAskAnswer('')
+  }
+
+  // 6. AI 提问响应：跳过
+  const handleAskSkip = async (): Promise<void> => {
+    if (!askBanner) return
+    await window.widgetApi.respondAsk(askBanner.requestId, '', true)
+    setAskBanner(null)
+    setAskAnswer('')
+  }
+
+  // 7. 新建会话
   const handleNewSession = async (): Promise<void> => {
     await window.widgetApi.agentNewSession()
     setMessages([])
     setCurrentStatus(null)
     setIsRunning(false)
     setConfirmBanner(null)
+    setAskBanner(null)
+    setAskAnswer('')
   }
 
   const handleStop = (): void => {
@@ -349,6 +387,62 @@ export function WidgetAgent(): JSX.Element {
             </button>
             <button className="confirm-allow" onClick={() => void handleConfirm(true)}>
               允许
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* AI 提问 banner（AI 需要用户提供信息时在小组件回答） */}
+      {askBanner && (
+        <div className="ask-banner">
+          <div className="ask-icon-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </div>
+          <div className="ask-content">
+            <div className="ask-question">{askBanner.question}</div>
+            {askBanner.options && askBanner.options.length > 0 ? (
+              <div className="ask-options">
+                {askBanner.options.map((opt, idx) => (
+                  <button
+                    key={idx}
+                    className="ask-option"
+                    onClick={() => void handleAskSubmit(opt)}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="ask-input-row">
+                <input
+                  className="ask-input"
+                  type="text"
+                  value={askAnswer}
+                  onChange={(e) => setAskAnswer(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && askAnswer.trim()) {
+                      e.preventDefault()
+                      void handleAskSubmit()
+                    }
+                  }}
+                  placeholder={askBanner.placeholder ?? '输入你的回答...'}
+                  autoFocus
+                />
+                <button
+                  className="ask-submit"
+                  onClick={() => void handleAskSubmit()}
+                  disabled={!askAnswer.trim()}
+                >
+                  回答
+                </button>
+              </div>
+            )}
+            <button className="ask-skip" onClick={() => void handleAskSkip()}>
+              跳过
             </button>
           </div>
         </div>

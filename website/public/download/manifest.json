@@ -1,15 +1,15 @@
 ﻿{
     "desktop":  {
-                    "version":  "0.2.65",
+                    "version":  "0.2.66",
                     "updatedAt":  "2026-07-13",
-                    "sizeBytes":  499471495,
-                    "filename":  "Xcomputer-0.2.65-setup.exe",
-                    "url":  "/download/Xcomputer-0.2.65-setup.exe",
+                    "sizeBytes":  499474863,
+                    "filename":  "Xcomputer-0.2.66-setup.exe",
+                    "url":  "/download/Xcomputer-0.2.66-setup.exe",
                     "size":  "476.3 MB",
                     "releaseNotes":  [
-                                         "小组件 Agent 模式交互优化：AI 点击操作时小组件缩为 mini 状态药丸保持可见，点击可展开",
-                                         "mini 模式现代化动画：玻璃态药丸、思考动画点、工作旋转环、平滑窗口缩放",
-                                         "主窗口自动清理空会话：启动时删除标题为「新会话」且无内容的孤儿会话"
+                                         "修复：小组件 AskUser 提问在组件页面显示不出来的问题",
+                                         "新增 AskUser 提问 banner：支持开放式文本输入和选项选择",
+                                         "提问 banner 支持 Enter 提交、跳过按钮、自动展开 mini 模式"
                                      ]
                 },
     "mobile":  {
