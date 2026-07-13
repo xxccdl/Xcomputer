@@ -80,7 +80,8 @@ export function useSession(): {
     const s = await window.api.session.create()
     addSession(s)
     setCurrent(s.id)
-    reset()
+    // 延迟到下一帧执行 reset，让侧栏先渲染新会话高亮，避免同步卸载大量 ChatMessage 阻塞主线程
+    requestAnimationFrame(() => reset())
   }, [addSession, setCurrent, reset, currentSessionId])
 
   const selectSession = useCallback(
@@ -109,7 +110,8 @@ export function useSession(): {
       // 生成唯一请求 ID，用于竞态保护
       const requestId = ++selectRequestIdRef.current
       setCurrent(id)
-      reset()
+      // 延迟到下一帧执行 reset，让侧栏先渲染目标会话高亮，避免同步卸载大量 ChatMessage 阻塞主线程
+      requestAnimationFrame(() => reset())
       useChatStore.setState({ isLoadingSession: true })
 
       try {

@@ -72,7 +72,7 @@ const EXAMPLE_PROMPTS = [
 ]
 
 /** 虚拟化启用阈值：超过此条数时启用虚拟滚动，避免长会话 DOM 爆炸 */
-const VIRTUALIZATION_THRESHOLD = 80
+const VIRTUALIZATION_THRESHOLD = 20
 
 export function MainPanel(): JSX.Element {
   useChatEvents()
@@ -636,7 +636,8 @@ export function MainPanel(): JSX.Element {
                         top: 0,
                         left: 0,
                         width: '100%',
-                        transform: `translateY(${virtualRow.start}px)`
+                        transform: `translateY(${virtualRow.start}px)`,
+                        contain: 'content'
                       }}
                     >
                       {m.role === 'assistant' && m.stepIds && m.stepIds.length > 0 && (

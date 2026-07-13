@@ -1,19 +1,15 @@
 ﻿{
     "desktop":  {
-                    "version":  "0.2.56",
-                    "updatedAt":  "2026-07-12",
-                    "sizeBytes":  499437169,
-                    "filename":  "Xcomputer-0.2.56-setup.exe",
-                    "url":  "/download/Xcomputer-0.2.56-setup.exe",
+                    "version":  "0.2.57",
+                    "updatedAt":  "2026-07-13",
+                    "sizeBytes":  499440441,
+                    "filename":  "Xcomputer-0.2.57-setup.exe",
+                    "url":  "/download/Xcomputer-0.2.57-setup.exe",
                     "size":  "476.3 MB",
                     "releaseNotes":  [
-                                         "流式渲染性能优化：streamingMessage 分离 + React.memo 冻结历史消息，token 更新从 O(n) 降至 O(1)",
-                                         "Markdown 解析节流到 12fps（80ms），流式时 CPU 削减 80%+",
-                                         "stepsByMessageId Map 查表消除 O(n×m) filter，改为 O(1)",
-                                         "阈值门控虚拟化：超过 80 条消息自动启用虚拟滚动，长会话 DOM 减少 90%",
-                                         "后台定时器随窗口可见性节流：USB/网络轮询 10s→60s，调度检查 30s→120s",
-                                         "Electron webPreferences 优化：backgroundThrottling + 禁用拼写检查",
-                                         "移除 sticky banner backdrop-blur 减少滚动时 GPU 合成层重绘"
+                                         "修复新建对话 3 秒卡顿：降低虚拟化阈值 80→20，>20 条消息即启用虚拟滚动",
+                                         "延迟 reset() 到下一帧执行，侧栏先渲染新会话高亮（<16ms 响应）",
+                                         "虚拟化消息容器添加 contain: content 优化浏览器布局/绘制"
                                      ]
                 },
     "mobile":  {
