@@ -107,6 +107,41 @@ class SessionsStore {
     logger.info(`Loaded ${sessions.length} sessions`)
   }
 
+  /**
+   * 清理空会话：删除标题为默认名（"新会话"/"新对话"）且无消息、无步骤的会话。
+   * 在应用启动 loadAll() 后调用，避免崩溃残留的孤儿空会话堆积。
+   * @returns 被清理的会话数量
+   */
+  async cleanupEmptySessions(): Promise<number> {
+    const EMPTY_TITLES = ['新会话', '新对话']
+    let cleaned = 0
+    const toDelete: string[] = []
+
+    for (const session of this._cache) {
+      if (!EMPTY_TITLES.includes(session.title)) continue
+      const data = await this.readSessionFile(session.id)
+      if (!data) {
+        // 文件已丢失，也标记删除（清理缓存中的孤儿条目）
+        toDelete.push(session.id)
+        continue
+      }
+      // 仅当消息和步骤都为空时才清理（有内容的会话即使用默认标题也保留）
+      if (data.messages.length === 0 && data.steps.length === 0) {
+        toDelete.push(session.id)
+      }
+    }
+
+    for (const id of toDelete) {
+      this.delete(id)
+      cleaned++
+    }
+
+    if (cleaned > 0) {
+      logger.info(`[SessionsStore] 清理了 ${cleaned} 个空会话`)
+    }
+    return cleaned
+  }
+
   create(): Session {
     const now = Date.now()
     const session: Session = {

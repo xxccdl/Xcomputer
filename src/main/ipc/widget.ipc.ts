@@ -5,7 +5,7 @@ import { sessionsStore } from '../store/sessions'
 import { settingsStore } from '../store/settings'
 import { paymentService } from '../payment/payment-service'
 import { getOrchestrator, addRemoteListener, removeRemoteListener } from '../orchestrator/task-orchestrator'
-import { getWidgetWindow } from '../windows/widget-window'
+import { getWidgetWindow, exitWidgetMiniMode } from '../windows/widget-window'
 import { focusBrowserWindow } from '../utils/window-focus'
 import { logger } from '../utils/logger'
 import type { StepEvent, Settings, RelayQuota, PaidQuota, ConfirmRequest, AskRequest, Message, TaskStep, Session } from '@shared/types'
@@ -50,6 +50,11 @@ export function resetWidgetChat(): void {
 /** 查询 widget blur 是否被锁定（有 pending confirm/ask 时禁止自动隐藏） */
 export function isWidgetBlurLocked(): boolean {
   return widgetBlurLocked
+}
+
+/** 查询 widget agent 是否正在运行（blur 时决定缩为 mini 还是直接隐藏） */
+export function isWidgetAgentRunning(): boolean {
+  return widgetAgentRunning
 }
 
 /** 设置 blur 锁定状态 */
@@ -236,12 +241,14 @@ export function registerWidgetIpc(mainWindow: BrowserWindow): void {
         // source==='widget' 的确认请求转发到 widget，主窗口 ConfirmDialog 会过滤掉
         if (req?.source === 'widget') {
           setBlurLock(true) // 锁定 blur，防止窗口自动隐藏
+          exitWidgetMiniMode() // 若 widget 处于 mini 模式，先展开为全尺寸以显示确认横幅
           sendToWidget(IPC_CHANNELS.WIDGET_CONFIRM_REQUEST, req)
         }
       } else if (channel === IPC_CHANNELS.CHAT_ASK_REQUEST) {
         const req = data as AskRequest
         if (req?.source === 'widget') {
           setBlurLock(true)
+          exitWidgetMiniMode() // 若 widget 处于 mini 模式，先展开为全尺寸以显示提问
           sendToWidget(IPC_CHANNELS.WIDGET_ASK_REQUEST, req)
         }
       } else if (
@@ -468,6 +475,11 @@ export function registerWidgetIpc(mainWindow: BrowserWindow): void {
     if (win && !win.isDestroyed() && win.isVisible()) {
       win.hide()
     }
+  })
+
+  // 用户点击 mini 窗口 → 展开为全尺寸
+  ipcMain.on(IPC_CHANNELS.WIDGET_EXPAND, () => {
+    exitWidgetMiniMode()
   })
 
   // --- 积分查询 ---

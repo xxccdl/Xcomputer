@@ -3,9 +3,117 @@ import { is } from '@electron-toolkit/utils'
 import { join } from 'path'
 import { logger } from '../utils/logger'
 import { IPC_CHANNELS } from '@shared/constants'
-import { isWidgetBlurLocked } from '../ipc/widget.ipc'
+import { isWidgetBlurLocked, isWidgetAgentRunning } from '../ipc/widget.ipc'
 
 let widgetWindow: BrowserWindow | null = null
+
+// === Mini 模式状态 ===
+/** Widget 是否处于 mini 模式（AI 点击操作时缩为小窗保持可见） */
+let isMiniMode = false
+/** mini 模式尺寸（底部居中的状态药丸） */
+const MINI_WIDTH = 240
+const MINI_HEIGHT = 44
+/** 全尺寸模式尺寸 */
+const FULL_WIDTH = 380
+const FULL_HEIGHT = 520
+/** 窗口尺寸动画时长（ms），与 renderer CSS transition 协调 */
+const ANIM_DURATION = 280
+/** 当前动画帧 id，用于取消未完成的动画 */
+let animFrameId: NodeJS.Timeout | null = null
+
+/** 全尺寸窗口的缓存位置（进入 mini 前保存，恢复时还原） */
+let fullModeBounds: { x: number; y: number } | null = null
+
+/** 平滑动画窗口尺寸变化（requestAnimationFrame 驱动，ease-out cubic） */
+function animateBounds(
+  win: BrowserWindow,
+  target: { x: number; y: number; width: number; height: number },
+  duration: number = ANIM_DURATION
+): void {
+  if (animFrameId) {
+    clearTimeout(animFrameId)
+    animFrameId = null
+  }
+  const start = win.getBounds()
+  const startTime = Date.now()
+
+  const step = (): void => {
+    const elapsed = Date.now() - startTime
+    const t = Math.min(elapsed / duration, 1)
+    // ease-out cubic：先快后慢，自然流畅
+    const eased = 1 - Math.pow(1 - t, 3)
+    const x = Math.round(start.x + (target.x - start.x) * eased)
+    const y = Math.round(start.y + (target.y - start.y) * eased)
+    const width = Math.round(start.width + (target.width - start.width) * eased)
+    const height = Math.round(start.height + (target.height - start.height) * eased)
+    try {
+      win.setBounds({ x, y, width, height })
+    } catch {
+      // 窗口可能已销毁
+      return
+    }
+    if (t < 1) {
+      animFrameId = setTimeout(step, 1000 / 60) // ~60fps
+    } else {
+      animFrameId = null
+    }
+  }
+  step()
+}
+
+/** 进入 mini 模式：窗口缩为底部居中的状态药丸，通知 renderer 切换 UI */
+export function enterMiniMode(): void {
+  const win = getWidgetWindow()
+  if (!win || win.isDestroyed() || !win.isVisible() || isMiniMode) return
+
+  // 保存当前全尺寸位置（恢复时还原到原位）
+  const currentBounds = win.getBounds()
+  fullModeBounds = { x: currentBounds.x, y: currentBounds.y }
+
+  // mini 窗口定位到屏幕底部居中（如通知药丸）
+  const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
+  const miniX = Math.round((screenWidth - MINI_WIDTH) / 2)
+  const miniY = Math.round(screenHeight - MINI_HEIGHT - 16) // 距底部 16px
+
+  isMiniMode = true
+  logger.info('[Widget] 进入 mini 模式')
+
+  // 通知 renderer 切换到 mini UI（renderer 先做 CSS 过渡，同时主进程动画窗口尺寸）
+  if (!win.webContents.isDestroyed()) {
+    win.webContents.send(IPC_CHANNELS.WIDGET_MINI_MODE)
+  }
+  animateBounds(win, { x: miniX, y: miniY, width: MINI_WIDTH, height: MINI_HEIGHT })
+}
+
+/** 退出 mini 模式：恢复全尺寸窗口，通知 renderer 切换 UI */
+export function exitWidgetMiniMode(): void {
+  const win = getWidgetWindow()
+  if (!win || win.isDestroyed() || !isMiniMode) return
+
+  isMiniMode = false
+  logger.info('[Widget] 退出 mini 模式，恢复全尺寸')
+
+  // 通知 renderer 恢复全尺寸 UI
+  if (!win.webContents.isDestroyed()) {
+    win.webContents.send(IPC_CHANNELS.WIDGET_FULL_MODE)
+  }
+
+  // 恢复到进入 mini 前的位置，若无缓存则居中
+  const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
+  const restoreX = fullModeBounds?.x ?? Math.round((screenWidth - FULL_WIDTH) / 2)
+  const restoreY = fullModeBounds?.y ?? Math.round((screenHeight - FULL_HEIGHT) / 2)
+  fullModeBounds = null
+
+  animateBounds(win, { x: restoreX, y: restoreY, width: FULL_WIDTH, height: FULL_HEIGHT })
+
+  // 恢复后聚焦窗口（让用户能立即交互）
+  win.focus()
+}
+
+/** 查询当前是否处于 mini 模式 */
+export function isWidgetMiniMode(): boolean {
+  return isMiniMode
+}
 
 /** 创建 XC 桌面组件窗口（透明置顶、圆角玻璃效果、blur 自动隐藏） */
 export function createWidgetWindow(): BrowserWindow {
@@ -14,14 +122,12 @@ export function createWidgetWindow(): BrowserWindow {
   }
 
   const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
-  const widgetWidth = 380
-  const widgetHeight = 520
 
   widgetWindow = new BrowserWindow({
-    width: widgetWidth,
-    height: widgetHeight,
-    x: Math.round((screenWidth - widgetWidth) / 2),
-    y: Math.round((screenHeight - widgetHeight) / 2),
+    width: FULL_WIDTH,
+    height: FULL_HEIGHT,
+    x: Math.round((screenWidth - FULL_WIDTH) / 2),
+    y: Math.round((screenHeight - FULL_HEIGHT) / 2),
     resizable: false,
     frame: false,
     transparent: true,
@@ -52,21 +158,34 @@ export function createWidgetWindow(): BrowserWindow {
   })
 
   // blur 时自动隐藏（点击外部区域关闭 widget）
-  // blur 锁定时（有 pending 高危确认/提问）跳过自动隐藏，防止用户错过确认
+  // - blur 锁定中（有 pending 高危确认/提问）→ 跳过隐藏
+  // - agent 正在运行 → 缩为 mini 模式保持可见（而非完全隐藏）
+  // - 其他情况 → 直接隐藏
   widgetWindow.on('blur', () => {
     if (widgetWindow && !widgetWindow.isDestroyed() && widgetWindow.isVisible()) {
       if (isWidgetBlurLocked()) {
         logger.info('[Widget] blur 锁定中，跳过自动隐藏（有 pending 确认/提问）')
         return
       }
-      widgetWindow.hide()
+      if (isWidgetAgentRunning()) {
+        // agent 运行中：缩为 mini 模式，保持状态可见
+        enterMiniMode()
+      } else {
+        widgetWindow.hide()
+      }
     }
   })
 
   // 窗口重新显示时通知 renderer 刷新 agent 状态（恢复任务历史和未完成任务）
   widgetWindow.on('show', () => {
+    // 恢复显示时确保全尺寸模式（从 mini 重新打开时应展开）
+    if (isMiniMode) {
+      isMiniMode = false
+      fullModeBounds = null
+    }
     if (widgetWindow && !widgetWindow.isDestroyed() && !widgetWindow.webContents.isDestroyed()) {
       widgetWindow.webContents.send(IPC_CHANNELS.WIDGET_AGENT_REFRESH)
+      widgetWindow.webContents.send(IPC_CHANNELS.WIDGET_FULL_MODE)
     }
   })
 
@@ -101,11 +220,29 @@ export function getWidgetWindow(): BrowserWindow | null {
   return null
 }
 
-/** 显示/隐藏 widget（toggle） */
+/** 显示/隐藏 widget（toggle）
+ *  可见（含 mini 模式）→ 隐藏；隐藏 → 显示全尺寸 */
 export function toggleWidget(): boolean {
   const win = getWidgetWindow()
   if (!win) return false
   if (win.isVisible()) {
+    // 隐藏时重置 mini 状态（下次打开为全尺寸）
+    if (isMiniMode) {
+      isMiniMode = false
+      fullModeBounds = null
+      if (animFrameId) {
+        clearTimeout(animFrameId)
+        animFrameId = null
+      }
+      // 先恢复尺寸再隐藏，避免下次 show 时尺寸不对
+      const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
+      win.setBounds({
+        x: Math.round((screenWidth - FULL_WIDTH) / 2),
+        y: Math.round((screenHeight - FULL_HEIGHT) / 2),
+        width: FULL_WIDTH,
+        height: FULL_HEIGHT
+      })
+    }
     win.hide()
     return false
   } else {
@@ -117,6 +254,12 @@ export function toggleWidget(): boolean {
 
 /** 销毁 widget 窗口 */
 export function destroyWidgetWindow(): void {
+  if (animFrameId) {
+    clearTimeout(animFrameId)
+    animFrameId = null
+  }
+  isMiniMode = false
+  fullModeBounds = null
   if (widgetWindow && !widgetWindow.isDestroyed()) {
     widgetWindow.destroy()
   }

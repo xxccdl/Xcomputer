@@ -37,6 +37,10 @@ const IPC = {
   WIDGET_LIST_SESSIONS: 'widget:listSessions',
   WIDGET_DELETE_SESSION: 'widget:deleteSession',
   WIDGET_LOAD_SESSION: 'widget:loadSession',
+  // Mini 模式（AI 点击操作时缩为小窗）
+  WIDGET_MINI_MODE: 'widget:miniMode',
+  WIDGET_FULL_MODE: 'widget:fullMode',
+  WIDGET_EXPAND: 'widget:expand',
   // 确认/提问已解决广播（与主窗口共享通道名）
   CHAT_CONFIRM_RESOLVED: 'chat:confirmResolved',
   CHAT_ASK_RESOLVED: 'chat:askResolved'
@@ -370,6 +374,25 @@ const widgetApi = {
     const handler = (): void => cb()
     ipcRenderer.on(IPC.WIDGET_AGENT_REFRESH, handler)
     return () => ipcRenderer.removeListener(IPC.WIDGET_AGENT_REFRESH, handler)
+  },
+
+  // ============ Mini 模式 ============
+
+  /** 监听进入 mini 模式（AI 点击操作时窗口缩为小窗） */
+  onMiniMode(cb: () => void): Unsubscribe {
+    const handler = (): void => cb()
+    ipcRenderer.on(IPC.WIDGET_MINI_MODE, handler)
+    return () => ipcRenderer.removeListener(IPC.WIDGET_MINI_MODE, handler)
+  },
+  /** 监听恢复全尺寸模式 */
+  onFullMode(cb: () => void): Unsubscribe {
+    const handler = (): void => cb()
+    ipcRenderer.on(IPC.WIDGET_FULL_MODE, handler)
+    return () => ipcRenderer.removeListener(IPC.WIDGET_FULL_MODE, handler)
+  },
+  /** 用户点击 mini 窗口 → 请求展开为全尺寸 */
+  expandWidget(): void {
+    ipcRenderer.send(IPC.WIDGET_EXPAND)
   }
 }
 

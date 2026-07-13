@@ -212,6 +212,14 @@ interface WidgetAPI {
   onAskResolved(cb: (payload: { requestId: string; answer: string; skipped: boolean }) => void): () => void
   /** 监听窗口重新显示（触发状态刷新） */
   onAgentRefresh(cb: () => void): () => void
+
+  // ============ Mini 模式 ============
+  /** 监听进入 mini 模式（AI 点击操作时窗口缩为小窗） */
+  onMiniMode(cb: () => void): () => void
+  /** 监听恢复全尺寸模式 */
+  onFullMode(cb: () => void): () => void
+  /** 用户点击 mini 窗口 → 请求展开为全尺寸 */
+  expandWidget(): void
 }
 
 declare global {

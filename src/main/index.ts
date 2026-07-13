@@ -86,6 +86,8 @@ app.whenReady().then(async () => {
   fileSearchEngine.init()
   // 加载历史会话
   await sessionsStore.loadAll()
+  // 清理空会话（标题为"新会话"/"新对话"且无消息无步骤的孤儿会话）
+  await sessionsStore.cleanupEmptySessions()
 
   mainWindow = createMainWindow()
   registerIpcHandlers(mainWindow)

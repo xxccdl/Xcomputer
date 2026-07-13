@@ -1,15 +1,15 @@
 ﻿{
     "desktop":  {
-                    "version":  "0.2.64",
+                    "version":  "0.2.65",
                     "updatedAt":  "2026-07-13",
                     "sizeBytes":  499471495,
-                    "filename":  "Xcomputer-0.2.64-setup.exe",
-                    "url":  "/download/Xcomputer-0.2.64-setup.exe",
+                    "filename":  "Xcomputer-0.2.65-setup.exe",
+                    "url":  "/download/Xcomputer-0.2.65-setup.exe",
                     "size":  "476.3 MB",
                     "releaseNotes":  [
-                                         "小组件「任务」标签升级为会话列表：查看所有会话、删除管理、点击进入 Agent 对话",
-                                         "运行中会话显示脉动绿点指示器，当前会话高亮标记",
-                                         "支持从任务列表直接进入对应会话的智能对话，继续 Agent 执行"
+                                         "小组件 Agent 模式交互优化：AI 点击操作时小组件缩为 mini 状态药丸保持可见，点击可展开",
+                                         "mini 模式现代化动画：玻璃态药丸、思考动画点、工作旋转环、平滑窗口缩放",
+                                         "主窗口自动清理空会话：启动时删除标题为「新会话」且无内容的孤儿会话"
                                      ]
                 },
     "mobile":  {

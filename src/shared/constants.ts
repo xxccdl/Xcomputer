@@ -271,6 +271,9 @@ export const IPC_CHANNELS = {
   WIDGET_LIST_SESSIONS: 'widget:listSessions', // 查询所有会话 + 运行状态
   WIDGET_DELETE_SESSION: 'widget:deleteSession', // 删除指定会话
   WIDGET_LOAD_SESSION: 'widget:loadSession', // 加载已有会话到 widget agent
+  WIDGET_MINI_MODE: 'widget:miniMode', // 主进程 → renderer：进入 mini 模式（AI 点击时缩为小窗）
+  WIDGET_FULL_MODE: 'widget:fullMode', // 主进程 → renderer：恢复全尺寸模式
+  WIDGET_EXPAND: 'widget:expand', // renderer → 主进程：用户点击 mini 窗口请求展开
 
   // 确认/提问已解决广播（主进程 → 所有窗口，用于自动关闭对话框）
   CHAT_CONFIRM_RESOLVED: 'chat:confirmResolved',
