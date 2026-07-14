@@ -54,6 +54,9 @@ export function createFloatingBallWindow(): BrowserWindow {
   floatingBallWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
   // Windows: 在任务栏不显示
   floatingBallWindow.setSkipTaskbar(true)
+  // 悬浮球置顶级别设为 pop-up-menu（与小组件同级，高于主窗口 mini 的 floating），
+  // 确保不被主窗口 mini 药丸等 floating 级窗口遮挡；与小组件位置不重叠不会互相干扰
+  floatingBallWindow.setAlwaysOnTop(true, 'pop-up-menu')
 
   floatingBallWindow.on('ready-to-show', () => {
     floatingBallWindow?.show()

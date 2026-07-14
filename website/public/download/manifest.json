@@ -1,14 +1,13 @@
 ﻿{
     "desktop":  {
-                    "version":  "0.2.68",
+                    "version":  "0.2.69",
                     "updatedAt":  "2026-07-14",
-                    "sizeBytes":  499476727,
-                    "filename":  "Xcomputer-0.2.68-setup.exe",
-                    "url":  "/download/Xcomputer-0.2.68-setup.exe",
+                    "sizeBytes":  499476826,
+                    "filename":  "Xcomputer-0.2.69-setup.exe",
+                    "url":  "/download/Xcomputer-0.2.69-setup.exe",
                     "size":  "476.3 MB",
                     "releaseNotes":  [
-                                         "修复：小组件被主窗口 mini 药丸等窗口遮挡（提升 z-order 至 pop-up-menu 级别）",
-                                         "优化：主窗口 mini 药丸 alwaysOnTop 从 screen-saver 降为 floating，不再压制系统托盘菜单"
+                                         "修复：悬浮球个别情况被主窗口 mini 药丸等窗口遮挡（提升 z-order 至 pop-up-menu 级别）"
                                      ]
                 },
     "mobile":  {
