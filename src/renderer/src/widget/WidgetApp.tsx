@@ -70,6 +70,8 @@ interface AgentStepEvent {
 function MiniStatusBar(): JSX.Element {
   const [statusText, setStatusText] = useState('Xcomputer 正在工作')
   const [isThinking, setIsThinking] = useState(false)
+  // agent 是否正在运行（任务完成后设为 false，停止旋转动画）
+  const [isRunning, setIsRunning] = useState(true)
   const loadedRef = useRef(false)
 
   // 初始加载：拉取当前 agent 状态
@@ -79,11 +81,14 @@ function MiniStatusBar(): JSX.Element {
     void (async () => {
       try {
         const state = await window.widgetApi.agentGetState()
+        setIsRunning(state.isRunning)
         if (state.currentStatus) {
           setStatusText(state.currentStatus.text)
           setIsThinking(state.currentStatus.icon === 'thinking')
         } else if (state.isRunning) {
           setStatusText('Xcomputer 正在工作')
+        } else {
+          setStatusText('任务已完成')
         }
       } catch {
         // 静默
@@ -97,24 +102,29 @@ function MiniStatusBar(): JSX.Element {
       if (step.type === 'thinking' || step.type === 'deep_thinking') {
         setStatusText('Xcomputer 正在思考')
         setIsThinking(true)
+        setIsRunning(true)
       } else if (step.type === 'final') {
         setStatusText('任务已完成')
         setIsThinking(false)
+        setIsRunning(false)
       } else if (step.type === 'tool_call' || step.type === 'tool_result') {
         const friendly = getMiniStatusText(step.toolName)
         setStatusText(friendly)
         setIsThinking(false)
+        setIsRunning(true)
       }
     })
 
     const unsubDone = window.widgetApi.onAgentDone(() => {
       setStatusText('任务已完成')
       setIsThinking(false)
+      setIsRunning(false)
     })
 
     const unsubError = window.widgetApi.onAgentError(() => {
       setStatusText('任务出错')
       setIsThinking(false)
+      setIsRunning(false)
     })
 
     return () => {
@@ -131,14 +141,22 @@ function MiniStatusBar(): JSX.Element {
       title="点击展开"
     >
       <div className="mini-status-content">
-        {isThinking ? (
-          <span className="mini-thinking-dots">
-            <span className="mini-dot" />
-            <span className="mini-dot" />
-            <span className="mini-dot" />
-          </span>
+        {isRunning ? (
+          isThinking ? (
+            <span className="mini-thinking-dots">
+              <span className="mini-dot" />
+              <span className="mini-dot" />
+              <span className="mini-dot" />
+            </span>
+          ) : (
+            <span className="mini-working-ring" />
+          )
         ) : (
-          <span className="mini-working-ring" />
+          <span className="mini-done-ring">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </span>
         )}
         <span className="mini-status-text">{statusText}</span>
       </div>
