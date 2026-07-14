@@ -85,7 +85,10 @@ export function enterMainMiniMode(): void {
   const miniY = Math.round(screenHeight - MINI_HEIGHT - 16)
 
   isMiniMode = true
-  mainWindow.setAlwaysOnTop(true, 'screen-saver')
+  // 使用 floating 级别而非 screen-saver：screen-saver 是最高 z-order，
+  // 会压制系统托盘的右键菜单和通知，导致托盘图标"被窗口影响"。
+  // floating 足以让药丸浮在普通窗口之上，且不干扰系统 UI。
+  mainWindow.setAlwaysOnTop(true, 'floating')
   mainWindow.setSkipTaskbar(true)
   logger.info('[Main] 进入 mini 模式')
 

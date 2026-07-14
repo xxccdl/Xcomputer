@@ -159,6 +159,9 @@ export function createWidgetWindow(): BrowserWindow {
   // 允许在所有工作区/全屏应用之上（macOS）
   widgetWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
   widgetWindow.setSkipTaskbar(true)
+  // 小组件置顶级别设为 pop-up-menu（高于 floating），确保不被主窗口 mini 药丸、
+  // 悬浮球等 floating 级窗口遮挡；低于 screen-saver，不压制系统托盘菜单/通知
+  widgetWindow.setAlwaysOnTop(true, 'pop-up-menu')
 
   widgetWindow.on('ready-to-show', () => {
     logger.info('[Widget] 窗口就绪')

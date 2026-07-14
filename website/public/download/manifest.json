@@ -1,16 +1,14 @@
 ﻿{
     "desktop":  {
-                    "version":  "0.2.67",
+                    "version":  "0.2.68",
                     "updatedAt":  "2026-07-14",
-                    "sizeBytes":  499465591,
-                    "filename":  "Xcomputer-0.2.67-setup.exe",
-                    "url":  "/download/Xcomputer-0.2.67-setup.exe",
+                    "sizeBytes":  499476727,
+                    "filename":  "Xcomputer-0.2.68-setup.exe",
+                    "url":  "/download/Xcomputer-0.2.68-setup.exe",
                     "size":  "476.3 MB",
                     "releaseNotes":  [
-                                         "新增：主窗口 agent 执行时也缩为右下角状态药丸（跟小组件一样逻辑）",
-                                         "修复：widget mini 模式多显示器定位错误（跳到主屏的问题）",
-                                         "修复：fullModeBounds 仅缓存 x/y 导致恢复丢失窗口尺寸",
-                                         "优化：主窗口 mini 模式支持确认/提问请求自动展开"
+                                         "修复：小组件被主窗口 mini 药丸等窗口遮挡（提升 z-order 至 pop-up-menu 级别）",
+                                         "优化：主窗口 mini 药丸 alwaysOnTop 从 screen-saver 降为 floating，不再压制系统托盘菜单"
                                      ]
                 },
     "mobile":  {
