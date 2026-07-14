@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { ThreeColumnLayout } from './components/layout/ThreeColumnLayout'
 import { InitGuide } from './components/init/InitGuide'
+import { MainMiniStatusBar } from './components/MainMiniStatusBar'
 import { useSettingsStore } from './store/settings.store'
 import { useSession } from './hooks/useSession'
 import { initMcpStatus } from './store/mcp.store'
@@ -21,6 +22,8 @@ export default function App(): JSX.Element {
   const [apiMissing, setApiMissing] = useState(false)
   // null = 检查中
   const [initState, setInitState] = useState<InitState | null>(null)
+  // 主窗口 mini 模式（agent 执行中 blur 时缩为右下角状态药丸）
+  const [isMainMini, setIsMainMini] = useState(false)
 
   /** 重新检查初始化场景并更新状态（用于首次加载和手动触发向导） */
   const refreshInitState = async (): Promise<void> => {
@@ -62,11 +65,21 @@ export default function App(): JSX.Element {
       void refreshInitState()
     })
 
+    // 监听主窗口 mini/full 模式切换（agent 执行中 blur 时触发）
+    const unsubMini = window.api.window.onMiniMode(() => {
+      setIsMainMini(true)
+    })
+    const unsubFull = window.api.window.onFullMode(() => {
+      setIsMainMini(false)
+    })
+
     return () => {
       unsub()
       unsubFloatingBall()
       unsubMcp?.()
       unsubShowGuide()
+      unsubMini()
+      unsubFull()
     }
   }, [setSettings, createSession])
 
@@ -103,5 +116,19 @@ export default function App(): JSX.Element {
     )
   }
 
-  return <ThreeColumnLayout />
+  // 主窗口 mini 模式：ThreeColumnLayout 保持挂载（CSS 隐藏，保留事件监听器），
+  // 叠加 mini 状态药丸。跟小组件 mini 模式一样的做法——不卸载完整 UI，
+  // 避免 mini → full 切换时 confirm/ask 请求事件丢失。
+  return (
+    <div className={`main-app-root ${isMainMini ? 'main-mini-active' : ''}`}>
+      <div className={`main-full-ui ${isMainMini ? 'main-full-hidden' : ''}`}>
+        <ThreeColumnLayout />
+      </div>
+      {isMainMini && (
+        <div className="main-mini-container">
+          <MainMiniStatusBar />
+        </div>
+      )}
+    </div>
+  )
 }

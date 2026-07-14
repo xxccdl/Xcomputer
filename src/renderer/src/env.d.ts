@@ -53,6 +53,12 @@ interface XcomputerAPI {
     close(): Promise<void>
     isMaximized(): Promise<boolean>
     onMaximizedChanged(cb: Listener<boolean>): Unsubscribe
+    /** 主窗口进入 mini 模式（agent 执行中 blur 时触发） */
+    onMiniMode(cb: () => void): Unsubscribe
+    /** 主窗口恢复全尺寸模式 */
+    onFullMode(cb: () => void): Unsubscribe
+    /** 用户点击 mini 药丸请求展开主窗口 */
+    expandMini(): void
   }
   chat: {
     send(sessionId: string, text: string): Promise<void>

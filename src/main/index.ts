@@ -13,6 +13,14 @@ import { createFloatingBallWindow, destroyFloatingBallWindow } from './windows/f
 import { floatingBallState } from './utils/floating-ball-state'
 import { createWidgetWindow, destroyWidgetWindow, toggleWidget, getWidgetWindow } from './windows/widget-window'
 import { resetWidgetChat } from './ipc/widget.ipc'
+import {
+  setMainWindow,
+  handleMainWindowBlur,
+  handleMainWindowShow,
+  exitMainMiniMode,
+  isMainMiniMode,
+  destroyMainMiniMode
+} from './windows/main-window-mini'
 import { createTray, handleMainWindowClose, destroyTray, refreshTrayMenu } from './tray'
 import { memoryStore } from './store/memory'
 import { remoteControl } from './remote/remote-client'
@@ -44,6 +52,10 @@ if (!gotSingleInstanceLock) {
   app.on('second-instance', () => {
     logger.info('[App] 检测到第二个实例启动，聚焦到已有窗口')
     if (!mainWindow || mainWindow.isDestroyed()) return
+    // mini 模式下先展开恢复全尺寸
+    if (isMainMiniMode()) {
+      exitMainMiniMode()
+    }
     focusBrowserWindow(mainWindow)
     refreshTrayMenu()
   })
@@ -91,20 +103,27 @@ app.whenReady().then(async () => {
 
   mainWindow = createMainWindow()
   registerIpcHandlers(mainWindow)
+  setMainWindow(mainWindow)
 
   // 创建系统托盘（右键支持退出、显示/隐藏主窗口和悬浮球）
   createTray(mainWindow)
   // 拦截主窗口关闭事件：最小化到托盘而非退出应用
   mainWindow.on('close', handleMainWindowClose)
 
-  // 窗口可见性节流：隐藏到托盘时降低后台轮询频率（USB/网络/调度），减少 CPU 占用
-  mainWindow.on('hide', () => {
-    triggerService.onWindowHidden()
-    scheduleService.onWindowHidden()
+  // 主窗口 mini 模式：agent 执行中 blur 时缩为右下角状态药丸（跟小组件一样逻辑）
+  mainWindow.on('blur', () => {
+    handleMainWindowBlur()
   })
   mainWindow.on('show', () => {
     triggerService.onWindowVisible()
     scheduleService.onWindowVisible()
+    handleMainWindowShow()
+  })
+
+  // 窗口可见性节流：隐藏到托盘时降低后台轮询频率（USB/网络/调度），减少 CPU 占用
+  mainWindow.on('hide', () => {
+    triggerService.onWindowHidden()
+    scheduleService.onWindowHidden()
   })
 
   // 创建悬浮球窗口并绑定到状态服务
@@ -151,9 +170,15 @@ app.whenReady().then(async () => {
   })
 
   // 注册全局快捷键
-  // Ctrl+Shift+X：显示/隐藏主窗口
+  // Ctrl+Shift+X：显示/隐藏主窗口（mini 模式下优先展开）
   const ret = globalShortcut.register('CommandOrControl+Shift+X', () => {
     if (!mainWindow || mainWindow.isDestroyed()) return
+    // mini 模式下：展开恢复全尺寸，而非隐藏
+    if (isMainMiniMode()) {
+      exitMainMiniMode()
+      refreshTrayMenu()
+      return
+    }
     if (mainWindow.isVisible() && mainWindow.isFocused()) {
       mainWindow.hide()
     } else {
@@ -272,6 +297,7 @@ app.on('before-quit', (e) => {
   destroyFloatingBallWindow()
   destroyWidgetWindow()
   destroySelfCheckWindow()
+  destroyMainMiniMode()
   terminalManager.closeAll()
 
   // 停止远程控制服务

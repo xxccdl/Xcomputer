@@ -6,6 +6,7 @@ import { settingsStore } from '../store/settings'
 import { paymentService } from '../payment/payment-service'
 import { getOrchestrator, addRemoteListener, removeRemoteListener } from '../orchestrator/task-orchestrator'
 import { getWidgetWindow, exitWidgetMiniMode } from '../windows/widget-window'
+import { exitMainMiniMode } from '../windows/main-window-mini'
 import { focusBrowserWindow } from '../utils/window-focus'
 import { logger } from '../utils/logger'
 import type { StepEvent, Settings, RelayQuota, PaidQuota, ConfirmRequest, AskRequest, Message, TaskStep, Session } from '@shared/types'
@@ -55,6 +56,11 @@ export function isWidgetBlurLocked(): boolean {
 /** 查询 widget agent 是否正在运行（blur 时决定缩为 mini 还是直接隐藏） */
 export function isWidgetAgentRunning(): boolean {
   return widgetAgentRunning
+}
+
+/** 获取 widget agent 的 session ID（主窗口 blur 过滤用：排除 widget session 后判断主窗口是否有 agent 运行） */
+export function getWidgetAgentSessionId(): string | null {
+  return widgetAgentSessionId
 }
 
 /** 设置 blur 锁定状态 */
@@ -248,6 +254,9 @@ export function registerWidgetIpc(mainWindow: BrowserWindow): void {
           }
           exitWidgetMiniMode() // 若 widget 处于 mini 模式，展开为全尺寸以显示确认横幅
           sendToWidget(IPC_CHANNELS.WIDGET_CONFIRM_REQUEST, req)
+        } else if (req?.source === 'main') {
+          // 主窗口 agent 的确认请求：若主窗口处于 mini 模式，展开以显示 ConfirmDialog
+          exitMainMiniMode()
         }
       } else if (channel === IPC_CHANNELS.CHAT_ASK_REQUEST) {
         const req = data as AskRequest
@@ -260,6 +269,9 @@ export function registerWidgetIpc(mainWindow: BrowserWindow): void {
           }
           exitWidgetMiniMode() // 若 widget 处于 mini 模式，展开为全尺寸以显示提问
           sendToWidget(IPC_CHANNELS.WIDGET_ASK_REQUEST, req)
+        } else if (req?.source === 'main') {
+          // 主窗口 agent 的提问请求：若主窗口处于 mini 模式，展开以显示 AskDialog
+          exitMainMiniMode()
         }
       } else if (
         channel === IPC_CHANNELS.CHAT_CONFIRM_RESOLVED ||

@@ -46,6 +46,10 @@ export const IPC_CHANNELS = {
   WINDOW_IS_MAXIMIZED: 'window:isMaximized',
   WINDOW_MAXIMIZED_CHANGED: 'window:maximizedChanged',
   WINDOW_SHOW: 'window:show',
+  // 主窗口 mini 模式（agent 执行时缩为右下角状态药丸，跟小组件一样逻辑）
+  MAIN_MINI_MODE: 'main:miniMode', // 主进程 → renderer：进入 mini 模式
+  MAIN_FULL_MODE: 'main:fullMode', // 主进程 → renderer：恢复全尺寸模式
+  MAIN_EXPAND: 'main:expand', // renderer → 主进程：用户点击 mini 药丸请求展开
 
   MCP_STATUS: 'mcp:status',
 

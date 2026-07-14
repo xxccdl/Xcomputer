@@ -21,8 +21,8 @@ const ANIM_DURATION = 280
 /** 当前动画帧 id，用于取消未完成的动画 */
 let animFrameId: NodeJS.Timeout | null = null
 
-/** 全尺寸窗口的缓存位置（进入 mini 前保存，恢复时还原） */
-let fullModeBounds: { x: number; y: number } | null = null
+/** 全尺寸窗口的缓存 bounds（进入 mini 前保存，恢复时还原位置+尺寸） */
+let fullModeBounds: { x: number; y: number; width: number; height: number } | null = null
 
 /** 平滑动画窗口尺寸变化（requestAnimationFrame 驱动，ease-out cubic） */
 function animateBounds(
@@ -66,12 +66,14 @@ export function enterMiniMode(): void {
   const win = getWidgetWindow()
   if (!win || win.isDestroyed() || !win.isVisible() || isMiniMode) return
 
-  // 保存当前全尺寸位置（恢复时还原到原位）
+  // 保存当前全尺寸 bounds（恢复时还原位置+尺寸）
   const currentBounds = win.getBounds()
-  fullModeBounds = { x: currentBounds.x, y: currentBounds.y }
+  fullModeBounds = { x: currentBounds.x, y: currentBounds.y, width: currentBounds.width, height: currentBounds.height }
 
-  // mini 窗口定位到屏幕右下角（不遮挡 AI 正在操作的区域）
-  const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
+  // mini 窗口定位到当前所在显示器的右下角（不遮挡 AI 正在操作的区域）
+  // 使用 getDisplayMatching 而非 getPrimaryDisplay，避免多显示器时窗口跳到主屏
+  const display = screen.getDisplayMatching(currentBounds)
+  const { width: screenWidth, height: screenHeight } = display.workArea
   const miniX = Math.round(screenWidth - MINI_WIDTH - 16) // 距右侧 16px
   const miniY = Math.round(screenHeight - MINI_HEIGHT - 16) // 距底部 16px
 
@@ -98,13 +100,18 @@ export function exitWidgetMiniMode(): void {
     win.webContents.send(IPC_CHANNELS.WIDGET_FULL_MODE)
   }
 
-  // 恢复到进入 mini 前的位置，若无缓存则居中
-  const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
-  const restoreX = fullModeBounds?.x ?? Math.round((screenWidth - FULL_WIDTH) / 2)
-  const restoreY = fullModeBounds?.y ?? Math.round((screenHeight - FULL_HEIGHT) / 2)
+  // 恢复到进入 mini 前的位置和尺寸，若无缓存则居中
+  const restoreW = fullModeBounds?.width ?? FULL_WIDTH
+  const restoreH = fullModeBounds?.height ?? FULL_HEIGHT
+  const display = fullModeBounds
+    ? screen.getDisplayMatching(fullModeBounds)
+    : screen.getPrimaryDisplay()
+  const { width: screenWidth, height: screenHeight } = display.workArea
+  const restoreX = fullModeBounds?.x ?? Math.round((screenWidth - restoreW) / 2)
+  const restoreY = fullModeBounds?.y ?? Math.round((screenHeight - restoreH) / 2)
   fullModeBounds = null
 
-  animateBounds(win, { x: restoreX, y: restoreY, width: FULL_WIDTH, height: FULL_HEIGHT })
+  animateBounds(win, { x: restoreX, y: restoreY, width: restoreW, height: restoreH })
 
   // 恢复后聚焦窗口（让用户能立即交互）
   win.focus()
@@ -188,7 +195,8 @@ export function createWidgetWindow(): BrowserWindow {
     if (widgetWindow && !widgetWindow.isDestroyed()) {
       const bounds = widgetWindow.getBounds()
       if (bounds.width !== FULL_WIDTH || bounds.height !== FULL_HEIGHT) {
-        const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
+        const display = screen.getDisplayMatching(bounds)
+        const { width: screenWidth, height: screenHeight } = display.workArea
         widgetWindow.setBounds({
           x: Math.round((screenWidth - FULL_WIDTH) / 2),
           y: Math.round((screenHeight - FULL_HEIGHT) / 2),
@@ -249,7 +257,8 @@ export function toggleWidget(): boolean {
         animFrameId = null
       }
       // 先恢复尺寸再隐藏，避免下次 show 时尺寸不对
-      const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
+      const display = screen.getDisplayMatching(win.getBounds())
+      const { width: screenWidth, height: screenHeight } = display.workArea
       win.setBounds({
         x: Math.round((screenWidth - FULL_WIDTH) / 2),
         y: Math.round((screenHeight - FULL_HEIGHT) / 2),

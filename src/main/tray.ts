@@ -2,6 +2,7 @@ import { Tray, Menu, BrowserWindow, app, nativeImage } from 'electron'
 import { join } from 'path'
 import { logger } from './utils/logger'
 import { focusBrowserWindow } from './utils/window-focus'
+import { exitMainMiniMode, isMainMiniMode } from './windows/main-window-mini'
 import { getFloatingBallWindow } from './windows/floating-ball-window'
 
 let tray: Tray | null = null
@@ -106,9 +107,12 @@ function updateTrayMenu(): void {
   tray.setContextMenu(menu)
 }
 
-/** 聚焦主窗口 */
+/** 聚焦主窗口（mini 模式下先展开恢复全尺寸） */
 function focusMainWindow(): void {
   if (!mainWindowRef || mainWindowRef.isDestroyed()) return
+  if (isMainMiniMode()) {
+    exitMainMiniMode()
+  }
   focusBrowserWindow(mainWindowRef)
   updateTrayMenu()
 }

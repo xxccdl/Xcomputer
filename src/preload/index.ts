@@ -69,6 +69,22 @@ const api = {
       const handler = (_e: IpcRendererEvent, payload: boolean): void => cb(payload)
       ipcRenderer.on(IPC_CHANNELS.WINDOW_MAXIMIZED_CHANGED, handler)
       return () => ipcRenderer.removeListener(IPC_CHANNELS.WINDOW_MAXIMIZED_CHANGED, handler)
+    },
+    /** 主窗口进入 mini 模式（agent 执行中 blur 时触发） */
+    onMiniMode(cb: () => void): Unsubscribe {
+      const handler = (): void => cb()
+      ipcRenderer.on(IPC_CHANNELS.MAIN_MINI_MODE, handler)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.MAIN_MINI_MODE, handler)
+    },
+    /** 主窗口恢复全尺寸模式 */
+    onFullMode(cb: () => void): Unsubscribe {
+      const handler = (): void => cb()
+      ipcRenderer.on(IPC_CHANNELS.MAIN_FULL_MODE, handler)
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.MAIN_FULL_MODE, handler)
+    },
+    /** 用户点击 mini 药丸请求展开主窗口 */
+    expandMini(): void {
+      ipcRenderer.send(IPC_CHANNELS.MAIN_EXPAND)
     }
   },
   chat: {
