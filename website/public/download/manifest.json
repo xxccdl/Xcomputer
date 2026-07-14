@@ -1,21 +1,22 @@
-﻿{
-    "desktop":  {
-                    "version":  "0.2.69",
-                    "updatedAt":  "2026-07-14",
-                    "sizeBytes":  499476826,
-                    "filename":  "Xcomputer-0.2.69-setup.exe",
-                    "url":  "/download/Xcomputer-0.2.69-setup.exe",
-                    "size":  "476.3 MB",
-                    "releaseNotes":  [
-                                         "修复：悬浮球个别情况被主窗口 mini 药丸等窗口遮挡（提升 z-order 至 pop-up-menu 级别）"
-                                     ]
-                },
-    "mobile":  {
-                   "version":  "1.0.0",
-                   "updatedAt":  "2026-06-27",
-                   "sizeBytes":  93041108,
-                   "filename":  "xphoneai-1.0.0.apk",
-                   "url":  "/download/xphoneai-1.0.0.apk",
-                   "size":  "88.7 MB"
-               }
+{
+    "desktop": {
+        "version": "0.2.70",
+        "updatedAt": "2026-07-14",
+        "sizeBytes": 499475629,
+        "filename": "Xcomputer-0.2.70-setup.exe",
+        "url": "/download/Xcomputer-0.2.70-setup.exe",
+        "size": "476.3 MB",
+        "releaseNotes": [
+            "修复：大窗口执行任务时用户点击被小组件 mini 药丸拦截（agent 完成后自动隐藏 mini 药丸）",
+            "修复：小组件 mini 药丸与主窗口 mini 药丸位置重叠（widget mini 移至左下角）"
+        ]
+    },
+    "mobile": {
+        "version": "1.0.0",
+        "updatedAt": "2026-06-27",
+        "sizeBytes": 93041108,
+        "filename": "xphoneai-1.0.0.apk",
+        "url": "/download/xphoneai-1.0.0.apk",
+        "size": "88.7 MB"
+    }
 }

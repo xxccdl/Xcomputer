@@ -70,11 +70,11 @@ export function enterMiniMode(): void {
   const currentBounds = win.getBounds()
   fullModeBounds = { x: currentBounds.x, y: currentBounds.y, width: currentBounds.width, height: currentBounds.height }
 
-  // mini 窗口定位到当前所在显示器的右下角（不遮挡 AI 正在操作的区域）
+  // mini 窗口定位到当前所在显示器的左下角（与主窗口 mini 药丸的右下角错开，避免重叠）
   // 使用 getDisplayMatching 而非 getPrimaryDisplay，避免多显示器时窗口跳到主屏
   const display = screen.getDisplayMatching(currentBounds)
-  const { width: screenWidth, height: screenHeight } = display.workArea
-  const miniX = Math.round(screenWidth - MINI_WIDTH - 16) // 距右侧 16px
+  const { height: screenHeight } = display.workArea
+  const miniX = 16 // 距左侧 16px（主窗口 mini 在右下角，widget mini 在左下角）
   const miniY = Math.round(screenHeight - MINI_HEIGHT - 16) // 距底部 16px
 
   isMiniMode = true

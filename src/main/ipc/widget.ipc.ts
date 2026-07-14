@@ -5,7 +5,7 @@ import { sessionsStore } from '../store/sessions'
 import { settingsStore } from '../store/settings'
 import { paymentService } from '../payment/payment-service'
 import { getOrchestrator, addRemoteListener, removeRemoteListener } from '../orchestrator/task-orchestrator'
-import { getWidgetWindow, exitWidgetMiniMode } from '../windows/widget-window'
+import { getWidgetWindow, exitWidgetMiniMode, isWidgetMiniMode } from '../windows/widget-window'
 import { exitMainMiniMode } from '../windows/main-window-mini'
 import { focusBrowserWindow } from '../utils/window-focus'
 import { logger } from '../utils/logger'
@@ -228,6 +228,11 @@ export function registerWidgetIpc(mainWindow: BrowserWindow): void {
         const payload = data as { sessionId: string }
         if (payload?.sessionId === widgetAgentSessionId) {
           widgetAgentRunning = false
+          // Agent 任务完成后，若 widget 处于 mini 模式则隐藏窗口
+          // （任务已完成，无需保持 mini 药丸可见，避免拦截主窗口点击）
+          if (isWidgetMiniMode()) {
+            getWidgetWindow()?.hide()
+          }
           sendToWidget(IPC_CHANNELS.WIDGET_AGENT_DONE, payload)
         } else {
           taskRunning = false
@@ -237,6 +242,10 @@ export function registerWidgetIpc(mainWindow: BrowserWindow): void {
         const payload = data as { sessionId: string }
         if (payload?.sessionId === widgetAgentSessionId) {
           widgetAgentRunning = false
+          // Agent 任务出错后同样隐藏 mini 药丸
+          if (isWidgetMiniMode()) {
+            getWidgetWindow()?.hide()
+          }
           sendToWidget(IPC_CHANNELS.WIDGET_AGENT_ERROR, payload)
         } else {
           taskRunning = false
