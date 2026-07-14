@@ -1,14 +1,13 @@
 {
     "desktop": {
-        "version": "0.2.70",
+        "version": "0.2.71",
         "updatedAt": "2026-07-14",
-        "sizeBytes": 499475629,
-        "filename": "Xcomputer-0.2.70-setup.exe",
-        "url": "/download/Xcomputer-0.2.70-setup.exe",
+        "sizeBytes": 499475453,
+        "filename": "Xcomputer-0.2.71-setup.exe",
+        "url": "/download/Xcomputer-0.2.71-setup.exe",
         "size": "476.3 MB",
         "releaseNotes": [
-            "修复：大窗口执行任务时用户点击被小组件 mini 药丸拦截（agent 完成后自动隐藏 mini 药丸）",
-            "修复：小组件 mini 药丸与主窗口 mini 药丸位置重叠（widget mini 移至左下角）"
+            "修复：小组件 mini 药丸拦截用户点击（mini 模式启用点击穿透，仅悬停时可交互）"
         ]
     },
     "mobile": {

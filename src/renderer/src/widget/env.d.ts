@@ -220,6 +220,8 @@ interface WidgetAPI {
   onFullMode(cb: () => void): () => void
   /** 用户点击 mini 窗口 → 请求展开为全尺寸 */
   expandWidget(): void
+  /** 切换鼠标事件穿透（mini 模式：悬停时恢复可点击，移开时穿透） */
+  setMouseEventsEnabled(enabled: boolean): void
 }
 
 declare global {

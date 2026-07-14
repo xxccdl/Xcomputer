@@ -138,6 +138,8 @@ function MiniStatusBar(): JSX.Element {
     <div
       className="mini-status-pill"
       onClick={() => window.widgetApi.expandWidget()}
+      onMouseEnter={() => window.widgetApi.setMouseEventsEnabled(true)}
+      onMouseLeave={() => window.widgetApi.setMouseEventsEnabled(false)}
       title="点击展开"
     >
       <div className="mini-status-content">

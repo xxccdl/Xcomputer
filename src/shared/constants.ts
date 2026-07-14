@@ -278,6 +278,7 @@ export const IPC_CHANNELS = {
   WIDGET_MINI_MODE: 'widget:miniMode', // 主进程 → renderer：进入 mini 模式（AI 点击时缩为小窗）
   WIDGET_FULL_MODE: 'widget:fullMode', // 主进程 → renderer：恢复全尺寸模式
   WIDGET_EXPAND: 'widget:expand', // renderer → 主进程：用户点击 mini 窗口请求展开
+  WIDGET_SET_MOUSE_EVENTS: 'widget:setMouseEvents', // renderer → 主进程：切换鼠标事件穿透（mini 模式点击穿透）
 
   // 确认/提问已解决广播（主进程 → 所有窗口，用于自动关闭对话框）
   CHAT_CONFIRM_RESOLVED: 'chat:confirmResolved',

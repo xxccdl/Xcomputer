@@ -41,6 +41,7 @@ const IPC = {
   WIDGET_MINI_MODE: 'widget:miniMode',
   WIDGET_FULL_MODE: 'widget:fullMode',
   WIDGET_EXPAND: 'widget:expand',
+  WIDGET_SET_MOUSE_EVENTS: 'widget:setMouseEvents',
   // 确认/提问已解决广播（与主窗口共享通道名）
   CHAT_CONFIRM_RESOLVED: 'chat:confirmResolved',
   CHAT_ASK_RESOLVED: 'chat:askResolved'
@@ -393,6 +394,10 @@ const widgetApi = {
   /** 用户点击 mini 窗口 → 请求展开为全尺寸 */
   expandWidget(): void {
     ipcRenderer.send(IPC.WIDGET_EXPAND)
+  },
+  /** 通知主进程是否启用鼠标事件（mini 模式：透明区域点击穿透，悬停时恢复可点击） */
+  setMouseEventsEnabled(enabled: boolean): void {
+    ipcRenderer.send(IPC.WIDGET_SET_MOUSE_EVENTS, enabled)
   }
 }
 

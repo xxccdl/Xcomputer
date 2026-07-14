@@ -80,6 +80,11 @@ export function enterMiniMode(): void {
   isMiniMode = true
   logger.info('[Widget] 进入 mini 模式')
 
+  // mini 模式默认点击穿透（forward: true 保留 mousemove 转发），
+  // 避免mini药丸拦截用户对主窗口等下方窗口的点击操作。
+  // renderer 的 MiniStatusBar 在 onMouseEnter 时恢复可点击、onMouseLeave 时恢复穿透。
+  win.setIgnoreMouseEvents(true, { forward: true })
+
   // 通知 renderer 切换到 mini UI（renderer 先做 CSS 过渡，同时主进程动画窗口尺寸）
   if (!win.webContents.isDestroyed()) {
     win.webContents.send(IPC_CHANNELS.WIDGET_MINI_MODE)
@@ -94,6 +99,9 @@ export function exitWidgetMiniMode(): void {
 
   isMiniMode = false
   logger.info('[Widget] 退出 mini 模式，恢复全尺寸')
+
+  // 恢复全尺寸模式：关闭点击穿透，正常接收鼠标事件
+  win.setIgnoreMouseEvents(false)
 
   // 通知 renderer 恢复全尺寸 UI
   if (!win.webContents.isDestroyed()) {
@@ -120,6 +128,17 @@ export function exitWidgetMiniMode(): void {
 /** 查询当前是否处于 mini 模式 */
 export function isWidgetMiniMode(): boolean {
   return isMiniMode
+}
+
+/** 设置 widget 窗口的鼠标事件穿透状态
+ *  - enabled=true → 接收鼠标事件（正常交互）
+ *  - enabled=false → 鼠标事件穿透到下方窗口（但 forward 保留 mousemove 转发，
+ *    使 renderer 仍能检测 hover 并恢复可点击）
+ *  用于 mini 模式：默认点击穿透，悬停时恢复可点击，避免 mini 药丸拦截主窗口点击 */
+export function setWidgetMouseEvents(enabled: boolean): void {
+  const win = getWidgetWindow()
+  if (!win || win.isDestroyed()) return
+  win.setIgnoreMouseEvents(!enabled, { forward: true })
 }
 
 /** 创建 XC 桌面组件窗口（透明置顶、圆角玻璃效果、blur 自动隐藏） */
@@ -193,6 +212,10 @@ export function createWidgetWindow(): BrowserWindow {
       isMiniMode = false
       fullModeBounds = null
     }
+    // 确保全尺寸模式下不点击穿透（mini 模式可能残留 setIgnoreMouseEvents）
+    if (widgetWindow && !widgetWindow.isDestroyed()) {
+      widgetWindow.setIgnoreMouseEvents(false)
+    }
     // 防御性尺寸恢复：若窗口在 mini 模式下被隐藏（如 WIDGET_HIDE），
     // 再次 show 时尺寸仍是 mini（240×44），需恢复为全尺寸以免 UI 被裁剪
     if (widgetWindow && !widgetWindow.isDestroyed()) {
@@ -259,6 +282,8 @@ export function toggleWidget(): boolean {
         clearTimeout(animFrameId)
         animFrameId = null
       }
+      // 恢复鼠标事件为正常状态（清除 mini 模式的点击穿透）
+      win.setIgnoreMouseEvents(false)
       // 先恢复尺寸再隐藏，避免下次 show 时尺寸不对
       const display = screen.getDisplayMatching(win.getBounds())
       const { width: screenWidth, height: screenHeight } = display.workArea

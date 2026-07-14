@@ -5,7 +5,7 @@ import { sessionsStore } from '../store/sessions'
 import { settingsStore } from '../store/settings'
 import { paymentService } from '../payment/payment-service'
 import { getOrchestrator, addRemoteListener, removeRemoteListener } from '../orchestrator/task-orchestrator'
-import { getWidgetWindow, exitWidgetMiniMode, isWidgetMiniMode } from '../windows/widget-window'
+import { getWidgetWindow, exitWidgetMiniMode, isWidgetMiniMode, setWidgetMouseEvents } from '../windows/widget-window'
 import { exitMainMiniMode } from '../windows/main-window-mini'
 import { focusBrowserWindow } from '../utils/window-focus'
 import { logger } from '../utils/logger'
@@ -525,6 +525,11 @@ export function registerWidgetIpc(mainWindow: BrowserWindow): void {
   // 用户点击 mini 窗口 → 展开为全尺寸
   ipcMain.on(IPC_CHANNELS.WIDGET_EXPAND, () => {
     exitWidgetMiniMode()
+  })
+
+  // mini 模式下动态切换鼠标事件穿透：鼠标悬停在药丸上时恢复可点击，移开时穿透
+  ipcMain.on(IPC_CHANNELS.WIDGET_SET_MOUSE_EVENTS, (_e, enabled: boolean) => {
+    setWidgetMouseEvents(enabled)
   })
 
   // --- 积分查询 ---
