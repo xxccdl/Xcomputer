@@ -1,0 +1,27 @@
+{
+    "desktop": {
+        "version": "0.2.73",
+        "updatedAt": "2026-07-14",
+        "sizeBytes": 499476062,
+        "filename": "Xcomputer-0.2.73-setup.exe",
+        "url": "/download/Xcomputer-0.2.73-setup.exe",
+        "size": "476.34 MB",
+        "giteeTag": "v0.2.73",
+        "giteePartsCount": 6,
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.73/Xcomputer-0.2.73-setup.exe",
+        "releaseNotes": [
+            "修复：子代理使用自定义模板（defaultMaxRounds=0 继承全局）时 maxRounds 被错误计算为 0 导致立即停止的 bug",
+            "功能：专业模型 (Pro) 下拉框新增 deepseek-v4-flash 选项",
+            "功能：更新检查改为 Gitee 优先 + GitHub 备用双路线，国内用户下载更稳定",
+            "安全：Security Update"
+        ]
+    },
+    "mobile": {
+        "version": "1.0.0",
+        "updatedAt": "2026-06-27",
+        "sizeBytes": 93041108,
+        "filename": "xphoneai-1.0.0.apk",
+        "url": "/download/xphoneai-1.0.0.apk",
+        "size": "88.7 MB"
+    }
+}
