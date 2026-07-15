@@ -1,0 +1,26 @@
+{
+    "desktop": {
+        "version": "0.2.75",
+        "updatedAt": "2026-07-15",
+        "sizeBytes": 499475722,
+        "filename": "Xcomputer-0.2.75-setup.exe",
+        "url": "/download/Xcomputer-0.2.75-setup.exe",
+        "size": "476.34 MB",
+        "giteeTag": "v0.2.75",
+        "giteePartsCount": 6,
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.75/Xcomputer-0.2.75-setup.exe",
+        "releaseNotes": [
+            "修复：Widget mini 药丸在主窗口全尺寸显示时嵌入主窗口的问题",
+            "优化：Widget mini 模式智能避让主窗口区域，自动选择屏幕角落定位",
+            "优化：多显示器场景下 widget mini 跟随所在显示器定位"
+        ]
+    },
+    "mobile": {
+        "version": "1.0.0",
+        "updatedAt": "2026-06-27",
+        "sizeBytes": 93041108,
+        "filename": "xphoneai-1.0.0.apk",
+        "url": "/download/xphoneai-1.0.0.apk",
+        "size": "88.7 MB"
+    }
+}
