@@ -1,25 +1,19 @@
 {
     "desktop": {
-        "version": "0.2.74",
-        "updatedAt": "2026-07-14",
+        "version": "0.2.76",
+        "updatedAt": "2026-07-15",
         "sizeBytes": 499476062,
-        "filename": "Xcomputer-0.2.74-setup.exe",
-        "url": "/download/Xcomputer-0.2.74-setup.exe",
+        "filename": "Xcomputer-0.2.76-setup.exe",
+        "url": "/download/Xcomputer-0.2.76-setup.exe",
         "size": "476.34 MB",
-        "giteeTag": "v0.2.74",
+        "giteeTag": "v0.2.76",
         "giteePartsCount": 6,
-        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.74/Xcomputer-0.2.74-setup.exe",
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.76/Xcomputer-0.2.76-setup.exe",
         "releaseNotes": [
-            "安全：修复所有窗口 setWindowOpenHandler 的 URL 协议校验缺失（防止 file:/javascript: 协议劫持）",
-            "安全：移除 MCP 配置 spawnSync 中的 shell:true（防止命令注入）",
-            "安全：修复 Session Store 写入链中断导致会话数据静默丢失",
-            "安全：添加 IPC 发送者校验深度防御（设置更新、支付订单等高危操作）",
-            "安全：替换 globalThis 全局透传为类型安全注册表",
-            "安全：TTS rate 参数数字校验和范围限制",
-            "修复：Session Store 锁链超时保护，防止永久死锁",
-            "修复：下载流 streamError 未处理 rejection",
-            "修复：Schedule Service stop() 清空 runningTaskIds",
-            "安全：Security Update"
+            "优化：工具调用显示改用友好中文文案，替代原始 JSON（电脑小白可读）",
+            "优化：工具展开详情显示参数摘要和结果摘要，不再显示 JSON",
+            "优化：MCP 工具列表缓存，减少每次 AI 请求的 IPC 开销",
+            "优化：对话页面工具调用状态与 mini 组件视觉统一"
         ]
     },
     "mobile": {
