@@ -1,18 +1,22 @@
 {
     "desktop": {
-        "version": "0.2.82",
-        "updatedAt": "2026-07-16",
-        "sizeBytes": 499499186,
-        "filename": "Xcomputer-0.2.82-setup.exe",
-        "url": "/download/Xcomputer-0.2.82-setup.exe",
-        "size": "476.36 MB",
-        "giteeTag": "v0.2.82",
+        "version": "0.2.83",
+        "updatedAt": "2026-07-17",
+        "sizeBytes": 500637122,
+        "filename": "Xcomputer-0.2.83-setup.exe",
+        "url": "/download/Xcomputer-0.2.83-setup.exe",
+        "size": "477.45 MB",
+        "giteeTag": "v0.2.83",
         "giteePartsCount": 6,
         "giteePartSuffix": ".part.zip",
-        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.82/Xcomputer-0.2.82-setup.exe",
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.83/Xcomputer-0.2.83-setup.exe",
         "releaseNotes": [
-            "修复：OpenX 云端代理（OxPX）无法使用 — 代理模式下不再检查积分，pro/flash 模型选择不受积分限制",
-            "优化：OpenX 代理 + flash 模型显式关闭思考模式，避免不必要的 reasoning token 消耗"
+            "新增：悬浮球拖文件到屏幕顶部时丝滑变成嘴（期待投喂），松开自动恢复",
+            "修复：悬浮球鼠标离开后状态提示（如「空闲」）仍残留显示的问题",
+            "优化：悬浮球 tooltip 改用 JS 控制可见性，避免透明窗口下 CSS :hover 失效",
+            "新增：Mac/Linux 打包脚本和 GitHub Actions 自动构建工作流",
+            "修复：打开技能窗口等模态框后输入框焦点丢失、无法输入的问题",
+            "修复：点击小组件 mini 药丸时点击穿透到主窗口，导致主窗口而非小组件展开的问题"
         ]
     },
     "mobile": {
