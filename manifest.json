@@ -1,18 +1,17 @@
 {
     "desktop": {
-        "version": "0.2.80",
+        "version": "0.2.81",
         "updatedAt": "2026-07-16",
-        "sizeBytes": 499498989,
-        "filename": "Xcomputer-0.2.80-setup.exe",
-        "url": "/download/Xcomputer-0.2.80-setup.exe",
+        "sizeBytes": 499498565,
+        "filename": "Xcomputer-0.2.81-setup.exe",
+        "url": "/download/Xcomputer-0.2.81-setup.exe",
         "size": "476.36 MB",
-        "giteeTag": "v0.2.80",
+        "giteeTag": "v0.2.81",
         "giteePartsCount": 6,
         "giteePartSuffix": ".part.zip",
-        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.80/Xcomputer-0.2.80-setup.exe",
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.81/Xcomputer-0.2.81-setup.exe",
         "releaseNotes": [
-            "新增：悬浮球支持文件拖拽投喂 — 直接将文件拖到悬浮球即可发送给 AI 分析",
-            "优化：悬浮球动画全面升级 — cubic-bezier 自然弹性曲线 + 毛玻璃效果 + 空闲浮动呼吸动画"
+            "新增：提示词自动优化 — 用户需求先经 AI 判断并优化提示词，补充上下文、结构化复杂任务，提升理解准确度"
         ]
     },
     "mobile": {
