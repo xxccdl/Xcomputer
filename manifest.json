@@ -1,17 +1,18 @@
 {
     "desktop": {
-        "version": "0.2.81",
+        "version": "0.2.82",
         "updatedAt": "2026-07-16",
-        "sizeBytes": 499498565,
-        "filename": "Xcomputer-0.2.81-setup.exe",
-        "url": "/download/Xcomputer-0.2.81-setup.exe",
+        "sizeBytes": 499499186,
+        "filename": "Xcomputer-0.2.82-setup.exe",
+        "url": "/download/Xcomputer-0.2.82-setup.exe",
         "size": "476.36 MB",
-        "giteeTag": "v0.2.81",
+        "giteeTag": "v0.2.82",
         "giteePartsCount": 6,
         "giteePartSuffix": ".part.zip",
-        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.81/Xcomputer-0.2.81-setup.exe",
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.82/Xcomputer-0.2.82-setup.exe",
         "releaseNotes": [
-            "新增：提示词自动优化 — 用户需求先经 AI 判断并优化提示词，补充上下文、结构化复杂任务，提升理解准确度"
+            "修复：OpenX 云端代理（OxPX）无法使用 — 代理模式下不再检查积分，pro/flash 模型选择不受积分限制",
+            "优化：OpenX 代理 + flash 模型显式关闭思考模式，避免不必要的 reasoning token 消耗"
         ]
     },
     "mobile": {
