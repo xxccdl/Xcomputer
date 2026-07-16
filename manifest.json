@@ -1,19 +1,18 @@
 {
     "desktop": {
-        "version": "0.2.76",
-        "updatedAt": "2026-07-15",
-        "sizeBytes": 499476062,
-        "filename": "Xcomputer-0.2.76-setup.exe",
-        "url": "/download/Xcomputer-0.2.76-setup.exe",
-        "size": "476.34 MB",
-        "giteeTag": "v0.2.76",
+        "version": "0.2.80",
+        "updatedAt": "2026-07-16",
+        "sizeBytes": 499498989,
+        "filename": "Xcomputer-0.2.80-setup.exe",
+        "url": "/download/Xcomputer-0.2.80-setup.exe",
+        "size": "476.36 MB",
+        "giteeTag": "v0.2.80",
         "giteePartsCount": 6,
-        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.76/Xcomputer-0.2.76-setup.exe",
+        "giteePartSuffix": ".part.zip",
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.80/Xcomputer-0.2.80-setup.exe",
         "releaseNotes": [
-            "优化：工具调用显示改用友好中文文案，替代原始 JSON（电脑小白可读）",
-            "优化：工具展开详情显示参数摘要和结果摘要，不再显示 JSON",
-            "优化：MCP 工具列表缓存，减少每次 AI 请求的 IPC 开销",
-            "优化：对话页面工具调用状态与 mini 组件视觉统一"
+            "新增：悬浮球支持文件拖拽投喂 — 直接将文件拖到悬浮球即可发送给 AI 分析",
+            "优化：悬浮球动画全面升级 — cubic-bezier 自然弹性曲线 + 毛玻璃效果 + 空闲浮动呼吸动画"
         ]
     },
     "mobile": {
