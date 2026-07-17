@@ -1,25 +1,18 @@
 {
     "desktop": {
-        "version": "0.2.85",
+        "version": "0.2.86",
         "updatedAt": "2026-07-17",
-        "sizeBytes": 500638374,
-        "filename": "Xcomputer-0.2.85-setup.exe",
-        "url": "/download/Xcomputer-0.2.85-setup.exe",
-        "size": "477.44 MB",
-        "giteeTag": "v0.2.85",
+        "sizeBytes": 500637485,
+        "filename": "Xcomputer-0.2.86-setup.exe",
+        "url": "/download/Xcomputer-0.2.86-setup.exe",
+        "size": "477.45 MB",
+        "giteeTag": "v0.2.86",
         "giteePartsCount": 6,
-        "giteePartSuffix": ".part.zip",
-        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.85/Xcomputer-0.2.85-setup.exe",
+        "giteePartSuffix": ".part",
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.86/Xcomputer-0.2.86-setup.exe",
         "releaseNotes": [
-            "新增：悬浮球拖文件到屏幕顶部时丝滑变成嘴（期待投喂），松开自动恢复",
-            "修复：悬浮球鼠标离开后状态提示（如「空闲」）仍残留显示的问题",
-            "优化：悬浮球 tooltip 改用 JS 控制可见性，避免透明窗口下 CSS :hover 失效",
-            "新增：Mac/Linux 打包脚本和 GitHub Actions 自动构建工作流",
-            "修复：打开技能窗口等模态框后输入框焦点丢失、无法输入的问题",
-            "修复：点击小组件 mini 药丸时点击穿透到主窗口，导致主窗口而非小组件展开的问题",
-            "修复：主窗口最大化时点击 AI 触发 mini 模式导致大黑屏的问题（最大化窗口无法缩小）",
-            "优化：Terminal 新增 exec 一次性执行命令、可见终端窗口、waitForOutput 等待输出",
-            "优化：编程模式 prompt 增强，AI 产出更精美的代码（类型安全/错误处理/性能/安全）"
+            "修复：更新下载后安装包被 Windows SmartScreen 阻止显示「此应用无法在你的电脑上运行」的问题（移除 Mark of the Web 标记）",
+            "优化：安装程序启动失败时自动打开文件所在目录，引导用户手动运行"
         ]
     },
     "mobile": {
