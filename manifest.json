@@ -1,15 +1,15 @@
 {
     "desktop": {
-        "version": "0.2.91",
+        "version": "0.2.93",
         "updatedAt": "2026-07-19",
-        "sizeBytes": 501693758,
-        "filename": "Xcomputer-0.2.91-setup.exe",
-        "url": "/download/Xcomputer-0.2.91-setup.exe",
-        "size": "478.45 MB",
-        "giteeTag": "v0.2.91",
+        "sizeBytes": 502010734,
+        "filename": "Xcomputer-0.2.93-setup.exe",
+        "url": "/download/Xcomputer-0.2.93-setup.exe",
+        "size": "478.75 MB",
+        "giteeTag": "v0.2.93",
         "giteePartsCount": 6,
         "giteePartSuffix": ".part",
-        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.91/Xcomputer-0.2.91-setup.exe",
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.93/Xcomputer-0.2.93-setup.exe",
         "releaseNotes": [
             "修复：工具箱被顶部更新栏挡住的问题"
         ]
