@@ -1,15 +1,15 @@
 {
     "desktop": {
-        "version": "0.2.88",
-        "updatedAt": "2026-07-18",
-        "sizeBytes": 501584927,
-        "filename": "Xcomputer-0.2.88-setup.exe",
-        "url": "/download/Xcomputer-0.2.88-setup.exe",
+        "version": "0.2.89",
+        "updatedAt": "2026-07-19",
+        "sizeBytes": 501586989,
+        "filename": "Xcomputer-0.2.89-setup.exe",
+        "url": "/download/Xcomputer-0.2.89-setup.exe",
         "size": "478.35 MB",
-        "giteeTag": "v0.2.88",
+        "giteeTag": "v0.2.89",
         "giteePartsCount": 6,
         "giteePartSuffix": ".part",
-        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.88/Xcomputer-0.2.88-setup.exe",
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.89/Xcomputer-0.2.89-setup.exe",
         "releaseNotes": [
             "修复：更新下载后安装包被 Windows SmartScreen 阻止显示「此应用无法在你的电脑上运行」的问题（移除 Mark of the Web 标记）",
             "优化：安装程序启动失败时自动打开文件所在目录，引导用户手动运行"
