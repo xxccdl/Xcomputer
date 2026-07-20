@@ -1,17 +1,21 @@
 {
     "desktop": {
-        "version": "0.2.95",
+        "version": "0.3.0",
         "updatedAt": "2026-07-20",
-        "sizeBytes": 502020475,
-        "filename": "Xcomputer-0.2.95-setup.exe",
-        "url": "/download/Xcomputer-0.2.95-setup.exe",
+        "sizeBytes": 502020485,
+        "filename": "Xcomputer-0.3.0-setup.exe",
+        "url": "/download/Xcomputer-0.3.0-setup.exe",
         "size": "478.76 MB",
-        "giteeTag": "v0.2.95",
+        "giteeTag": "v0.3.0",
         "giteePartsCount": 6,
         "giteePartSuffix": ".part",
-        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.2.95/Xcomputer-0.2.95-setup.exe",
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.3.0/Xcomputer-0.3.0-setup.exe",
         "releaseNotes": [
-            "修复：工具箱被顶部更新栏挡住的问题"
+            "安全审查修复（硬编码IP、错误信息暴露）",
+            "性能优化：SessionsStore内存缓存、上下文使用率缓存",
+            "修复：VoiceChat麦克风、WebFetch URL重定向",
+            "优化：Swarm集群稳定性、桌面组件改版",
+            "修复：Microphone静默失败、Invalid URL崩溃"
         ]
     },
     "mobile": {
