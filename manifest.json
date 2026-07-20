@@ -1,21 +1,20 @@
 {
     "desktop": {
-        "version": "0.3.0",
+        "version": "0.3.1",
         "updatedAt": "2026-07-20",
-        "sizeBytes": 502020485,
-        "filename": "Xcomputer-0.3.0-setup.exe",
-        "url": "/download/Xcomputer-0.3.0-setup.exe",
+        "sizeBytes": 502019915,
+        "filename": "Xcomputer-0.3.1-setup.exe",
+        "url": "/download/Xcomputer-0.3.1-setup.exe",
         "size": "478.76 MB",
-        "giteeTag": "v0.3.0",
+        "giteeTag": "v0.3.1",
         "giteePartsCount": 6,
         "giteePartSuffix": ".part",
-        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.3.0/Xcomputer-0.3.0-setup.exe",
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.3.1/Xcomputer-0.3.1-setup.exe",
         "releaseNotes": [
-            "安全审查修复（硬编码IP、错误信息暴露）",
-            "性能优化：SessionsStore内存缓存、上下文使用率缓存",
-            "修复：VoiceChat麦克风、WebFetch URL重定向",
-            "优化：Swarm集群稳定性、桌面组件改版",
-            "修复：Microphone静默失败、Invalid URL崩溃"
+            "修复：Xcomputer 启动一直卡在 Loading 画面无法进入主界面",
+            "修复：渲染进程 Uncaught ReferenceError: process is not defined",
+            "修复：ai-service.ts 重复 fastClient 成员定义",
+            "优化：Agent Swarmex 面板移至输入栏上方，更优雅的布局"
         ]
     },
     "mobile": {
