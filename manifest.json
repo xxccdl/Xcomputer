@@ -1,20 +1,20 @@
 {
     "desktop": {
-        "version": "0.3.1",
+        "version": "2.0.109",
         "updatedAt": "2026-07-20",
-        "sizeBytes": 502020522,
-        "filename": "Xcomputer-0.3.1-setup.exe",
-        "url": "/download/Xcomputer-0.3.1-setup.exe",
+        "sizeBytes": 502020587,
+        "filename": "Xcomputer-2.0.109-setup.exe",
+        "url": "/download/Xcomputer-2.0.109-setup.exe",
         "size": "478.76 MB",
-        "giteeTag": "v0.3.1",
+        "giteeTag": "v2.0.109",
         "giteePartsCount": 6,
         "giteePartSuffix": ".part",
-        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v0.3.1/Xcomputer-0.3.1-setup.exe",
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v2.0.109/Xcomputer-2.0.109-setup.exe",
         "releaseNotes": [
-            "修复：Xcomputer 启动一直卡在 Loading 画面无法进入主界面",
-            "修复：渲染进程 Uncaught ReferenceError: process is not defined",
-            "修复：ai-service.ts 重复 fastClient 成员定义",
-            "优化：Agent Swarmex 面板移至输入栏上方，更优雅的布局"
+            "修复：Swarm 集群面板折叠后无法再次展开",
+            "优化：Mini Agent 不再受 2 分钟整体超时限制，可无限运行",
+            "优化：EXE 打包排除 build/gitee-volumes 临时目录，防止体积异常增大",
+            "修复：步骤状态显示错误（startedAt 被重置、Swarm 步骤未传 stepId）"
         ]
     },
     "mobile": {
