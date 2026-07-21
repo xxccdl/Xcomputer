@@ -1,25 +1,19 @@
 {
     "desktop": {
-        "version": "2.0.111",
+        "version": "2.0.112",
         "updatedAt": "2026-07-21",
-        "sizeBytes": 502030694,
-        "filename": "Xcomputer-2.0.111-setup.exe",
-        "url": "/download/Xcomputer-2.0.111-setup.exe",
+        "sizeBytes": 502029289,
+        "filename": "Xcomputer-2.0.112-setup.exe",
+        "url": "/download/Xcomputer-2.0.112-setup.exe",
         "size": "478.77 MB",
-        "giteeTag": "v2.0.111",
+        "giteeTag": "v2.0.112",
         "giteePartsCount": 6,
         "giteePartSuffix": ".part",
-        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v2.0.111/Xcomputer-2.0.111-setup.exe",
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v2.0.112/Xcomputer-2.0.112-setup.exe",
         "releaseNotes": [
-            "新增：完整英文模式支持（UI 界面 + AI 响应语言切换）",
-            "优化：Swarm 集群稳定性增强（定时器泄漏修复、工具超时保护、AI 调用重试、消息历史裁剪、IPC 节流）",
-            "优化：操作详情面板 UI 现代化重写（玻璃卡片布局、渐变图标徽章、发光时间线、可折叠代码块）",
-            "优化：Todo 显示现代化（卡片式条目、自定义圆形勾选、进行中高亮、交错入场动画）",
-            "优化：工具执行失败自动重试（瞬时错误指数退避重试 2 次）",
-            "优化：上下文压缩时保留原始任务描述，防止 AI 丢失目标",
-            "优化：代码块新增独立复制按钮，悬停显示",
-            "优化：消息流新增回到底部浮动按钮，阅读时不被打断",
-            "优化：AI 开始执行任务时自动弹出操作详情面板"
+            "完善：全面国际化（i18n）覆盖 36 个组件文件，消除所有中文硬编码",
+            "完善：英文模式体验（zh-CN.json 与 en-US.json 翻译字典大幅扩展）",
+            "修复：FileSearchModal 与 TemplatesModal 的 TypeScript 编译错误"
         ]
     },
     "mobile": {
