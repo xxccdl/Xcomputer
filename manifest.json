@@ -1,23 +1,25 @@
 {
     "desktop": {
-        "version": "2.0.116",
+        "version": "2.0.117",
         "updatedAt": "2026-07-21",
-        "sizeBytes": 502032440,
-        "filename": "Xcomputer-2.0.116-setup.exe",
-        "url": "/download/Xcomputer-2.0.116-setup.exe",
+        "sizeBytes": 502032904,
+        "filename": "Xcomputer-2.0.117-setup.exe",
+        "url": "/download/Xcomputer-2.0.117-setup.exe",
         "size": "478.78 MB",
-        "giteeTag": "v2.0.116",
+        "giteeTag": "v2.0.117",
         "giteePartsCount": 6,
         "giteePartSuffix": ".part",
-        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v2.0.116/Xcomputer-2.0.116-setup.exe",
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v2.0.117/Xcomputer-2.0.117-setup.exe",
         "releaseNotes": [
-            "修复集群模式下偶发的 400 错误（msg with role \"tool\" must be a response to...）",
-            "根因：trimMessages 和 compressContextIfNeeded 裁剪消息历史时，可能把 assistant.tool_calls 消息裁剪掉，但保留了对应的 tool 结果消息，导致下次 AI 调用时 API 返回 400。",
+            "修复 MCP 初始化（向导界面）和 AI 调用系统查询工具时 Xcomputer 无响应的问题",
+            "根因：rebuildVenv 和 isVenvHealthy 在 Electron 主进程中使用 spawnSync 同步执行子进程（uv venv、pip install 等耗时操作长达 5 分钟），完全阻塞主进程事件循环，导致 UI 无响应、IPC 请求排队、进度推送无法送达。",
             "修复：",
-            "1. swarm-manager.ts trimMessages：丢弃 tail 开头孤立的 tool 消息，并检查 assistant.tool_calls 是否有对应 tool 响应",
-            "2. task-orchestrator.ts compressContextIfNeeded：丢弃 recentMessages 开头孤立的 tool 消息",
-            "3. isTransientError：增加 5xx/429/503/504/408 和中继后端偶发 400（含 tool_call 字样）的重试支持",
-            "4. callAiWithRetry：失败时记录详细错误日志（含状态码和错误消息前 300 字符）"
+            "1. 新增 spawnAsync 辅助函数（spawn + Promise），不阻塞主进程事件循环",
+            "2. rebuildVenv 改为 async 函数，所有 spawnSync（8 处）替换为 spawnAsync",
+            "3. isVenvHealthy 拆分为同步快速版（仅文件检查）+ 异步完整版（含模块导入验证）",
+            "4. init.ipc.ts INIT_REBUILD_VENV handler 改为 async",
+            "5. mcp-client.ts _start() 使用 isVenvHealthyAsync + await rebuildVenv",
+            "6. self-check-runner.ts 使用 isVenvHealthyAsync"
         ]
     },
     "mobile": {
