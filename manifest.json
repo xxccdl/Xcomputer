@@ -1,15 +1,15 @@
 {
     "desktop": {
-        "version": "2.0.114",
+        "version": "2.0.115",
         "updatedAt": "2026-07-21",
-        "sizeBytes": 502032841,
-        "filename": "Xcomputer-2.0.114-setup.exe",
-        "url": "/download/Xcomputer-2.0.114-setup.exe",
-        "size": "478.78 MB",
-        "giteeTag": "v2.0.114",
+        "sizeBytes": 502031595,
+        "filename": "Xcomputer-2.0.115-setup.exe",
+        "url": "/download/Xcomputer-2.0.115-setup.exe",
+        "size": "478.77 MB",
+        "giteeTag": "v2.0.115",
         "giteePartsCount": 6,
         "giteePartSuffix": ".part",
-        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v2.0.114/Xcomputer-2.0.114-setup.exe",
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v2.0.115/Xcomputer-2.0.115-setup.exe",
         "releaseNotes": [
             "新增：限免模式下支持使用集群（Agent Swarmex），自动降低并发数至 5 以减轻中继后端压力"
         ]
