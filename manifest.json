@@ -1,19 +1,17 @@
 {
     "desktop": {
-        "version": "2.0.112",
+        "version": "2.0.113",
         "updatedAt": "2026-07-21",
-        "sizeBytes": 502029289,
-        "filename": "Xcomputer-2.0.112-setup.exe",
-        "url": "/download/Xcomputer-2.0.112-setup.exe",
-        "size": "478.77 MB",
-        "giteeTag": "v2.0.112",
+        "sizeBytes": 502032913,
+        "filename": "Xcomputer-2.0.113-setup.exe",
+        "url": "/download/Xcomputer-2.0.113-setup.exe",
+        "size": "478.78 MB",
+        "giteeTag": "v2.0.113",
         "giteePartsCount": 6,
         "giteePartSuffix": ".part",
-        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v2.0.112/Xcomputer-2.0.112-setup.exe",
+        "githubUrl": "https://github.com/xxccdl/Xcomputer/releases/download/v2.0.113/Xcomputer-2.0.113-setup.exe",
         "releaseNotes": [
-            "完善：全面国际化（i18n）覆盖 36 个组件文件，消除所有中文硬编码",
-            "完善：英文模式体验（zh-CN.json 与 en-US.json 翻译字典大幅扩展）",
-            "修复：FileSearchModal 与 TemplatesModal 的 TypeScript 编译错误"
+            "修复：i18n 翻译失效问题（JSON 文件中存在重复顶级 key，导致 init/settings/main 区块被覆盖丢失）"
         ]
     },
     "mobile": {
